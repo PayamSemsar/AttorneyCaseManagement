@@ -14,7 +14,7 @@ export class User extends Entity {
     required: true,
     jsonSchema: {
       minLength: 1,
-      maxLength: 20,
+      maxLength: 32,
     },
   })
   firstName: string;
@@ -24,7 +24,7 @@ export class User extends Entity {
     required: true,
     jsonSchema: {
       minLength: 1,
-      maxLength: 20,
+      maxLength: 32,
     },
   })
   familyName: string;
@@ -57,6 +57,10 @@ export class User extends Entity {
 
   @property({
     type: 'string',
+    jsonSchema: {
+      minLength: 10,
+      maxLength: 10,
+    },
   })
   codePost?: string;
 

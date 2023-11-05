@@ -32,6 +32,9 @@ export class Case extends Entity {
   @property({
     type: 'string',
     required: true,
+    jsonSchema: {
+      minimum: 0,
+    },
   })
   petitionNumber: string;
 
@@ -44,12 +47,18 @@ export class Case extends Entity {
   @property({
     type: 'string',
     required: true,
+    jsonSchema: {
+      minimum: 0,
+    },
   })
   caseNumber: string;
 
   @property({
     type: 'string',
     required: true,
+    jsonSchema: {
+      minimum: 0,
+    },
   })
   branchArchiveNumber: string;
 

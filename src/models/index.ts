@@ -8,3 +8,4 @@ export * from './reminder-custom.model';
 export * from './case.model';
 export * from './case-event.model';
 export * from './finaneial-payment.model';
+export * from './users.model';

@@ -1,5 +1,6 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, belongsTo, model, property} from '@loopback/repository';
 import {codeGenerator} from '../helpers';
+import {User} from './user.model';
 
 @model()
 export class DescriptionComplaint extends Entity {
@@ -14,10 +15,6 @@ export class DescriptionComplaint extends Entity {
     type: 'string',
     required: true,
     default: codeGenerator(),
-    jsonSchema: {
-      minLength: 12,
-      maxLength: 12,
-    },
   })
   codeDescriptionComplaint: string;
 
@@ -31,15 +28,13 @@ export class DescriptionComplaint extends Entity {
   })
   titleDescriptionComplaint: string;
 
-  @property({
-    type: 'string',
+  @belongsTo(() => User, {
+    name: 'user', keyTo: '_id'
+  }, {
     required: true,
-    jsonSchema: {
-      minLength: 10,
-      maxLength: 10,
-    },
+    type: 'string'
   })
-  nationalCodeUser: string;
+  nationalCodeUserID: string;
 
   @property({
     type: 'number',

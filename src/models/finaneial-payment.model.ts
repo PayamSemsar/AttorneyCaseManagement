@@ -13,7 +13,7 @@ export class FinaneialPayment extends Entity {
     type: 'string',
     required: true,
   })
-  userNationalCode: string;
+  nationalCodeUserID: string;
 
   @property({
     type: 'string',
