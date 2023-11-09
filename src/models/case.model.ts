@@ -1,5 +1,4 @@
 import {Entity, model, property} from '@loopback/repository';
-import {codeGenerator} from '../helpers';
 
 @model()
 export class Case extends Entity {
@@ -13,7 +12,6 @@ export class Case extends Entity {
   @property({
     type: 'string',
     required: true,
-    default: codeGenerator(),
   })
   codeCase: string;
 
