@@ -83,7 +83,7 @@ export class CaseController {
         codeDescriptionComplaint: dcCode
       },
       fields: {
-
+        caseID: false
       }
     });
     return data;
