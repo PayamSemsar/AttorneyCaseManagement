@@ -5,20 +5,17 @@ import {
   repository
 } from '@loopback/repository';
 import {
-  HttpErrors,
   get,
-  getModelSchemaRef,
-  param,
+  getModelSchemaRef, HttpErrors, param,
   post,
   requestBody,
   response
 } from '@loopback/rest';
 import {RoleKeys} from '../enums';
 import {RefreshTokenServiceBindings, TokenServiceBindings, UserServiceBindings} from '../jwt-authentication';
-import {FinaneialPayment, Token, User, UserLogin, UserRefreshToken, Users} from '../models';
-import {DescriptionComplaints} from '../models/description-complaints.model';
+import {FinaneialPayment, Token, User, UserLogin, UserRefreshToken} from '../models';
 import {DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
-import {RefreshTokenService, TokenService, UserService, basicAuthorization} from '../services';
+import {basicAuthorization, RefreshTokenService, TokenService, UserService} from '../services';
 import {Tokens} from '../types/token.type';
 // import {Tokens} from '../types';
 
@@ -61,35 +58,17 @@ export class UserController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Users)
+        schema: getModelSchemaRef(User, {
+          exclude: ['addressOne', 'addressTwo', 'codePost', 'phoneNumber', 'role']
+        })
       },
     },
   })
   async getUsers(
     @param.path.number("skip") skip: number,
     @param.path.number("limit") limit: number,
-  ): Promise<Users[]> {
-    const data = await this.userRepository.find({skip, limit, fields: {firstName: true, familyName: true, nationalCode: true, userID: true}});
-    return data;
-  }
-
-  @authenticate('token')
-  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
-  @get("/user/description-complaint/{id}")
-  @response(200, {
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(DescriptionComplaints)
-      },
-    },
-  })
-  async getDescriptionComplaintUser(
-    @param.path.string("id") userId: string,
-  ): Promise<DescriptionComplaints[]> {
-    const data = await this.descriptionComplaintRepository.find({
-      where: {nationalCodeUserID: userId},
-      fields: {codeDescriptionComplaint: true, titleDescriptionComplaint: true, complaintResult: true}
-    });
+  ): Promise<User[]> {
+    const data = await this.userRepository.find({skip, limit, fields: {firstName: true, familyName: true, nationalCode: true, userID: true}, where: {role: RoleKeys.User}});
     return data;
   }
 
@@ -100,18 +79,19 @@ export class UserController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Users)
+        schema: getModelSchemaRef(User, {
+          exclude: ['addressOne', 'addressTwo', 'codePost', 'phoneNumber', 'role']
+        })
       },
     },
   })
   async getUserByID(
     @param.path.string("id") userId: string,
-  ): Promise<Users> {
+  ): Promise<User | null> {
     const data = await this.userRepository.findOne({
       where: {userID: userId},
       fields: {firstName: true, familyName: true, nationalCode: true, userID: true}
     });
-    if (!data) throw new HttpErrors[400]("مشکل در ای دی وجود دارد");
     return data;
   }
 
@@ -123,7 +103,9 @@ export class UserController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(FinaneialPayment)
+        schema: getModelSchemaRef(FinaneialPayment, {
+          exclude: ['nationalCodeUserID', "codeDescriptionComplaint"]
+        })
       },
     },
   })

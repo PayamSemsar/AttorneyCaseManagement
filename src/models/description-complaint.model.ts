@@ -1,6 +1,5 @@
-import {Entity, belongsTo, model, property} from '@loopback/repository';
+import {Entity, model, property} from '@loopback/repository';
 import {codeGenerator} from '../helpers';
-import {User} from './user.model';
 
 @model()
 export class DescriptionComplaint extends Entity {
@@ -28,9 +27,7 @@ export class DescriptionComplaint extends Entity {
   })
   titleDescriptionComplaint: string;
 
-  @belongsTo(() => User, {
-    name: 'user', keyTo: '_id'
-  }, {
+  @property({
     required: true,
     type: 'string'
   })

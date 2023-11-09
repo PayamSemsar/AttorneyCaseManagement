@@ -4,10 +4,8 @@ import {
   repository
 } from '@loopback/repository';
 import {
-  HttpErrors,
   get,
-  getModelSchemaRef,
-  param,
+  getModelSchemaRef, HttpErrors, param,
   post,
   requestBody,
   response
@@ -15,10 +13,9 @@ import {
 import {RoleKeys} from '../enums';
 import {dateNow} from '../helpers';
 import {DescriptionComplaint, FinaneialPayment} from '../models';
-import {DescriptionComplaints} from '../models/description-complaints.model';
 import {CaseRepository, DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services';
-
+var ObjectId = require('mongodb').ObjectId;
 
 @authenticate('token')
 @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
@@ -51,48 +48,70 @@ export class DescriptionComplaintController {
     await this.descriptionComplaintRepository.create(descriptionComplaint);
   }
 
-  @get('/description-complaints')
+  @get('/description-complaints/{skip}/{limit}/{id}')
   @response(200, {
     content: {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(DescriptionComplaints),
+          items: getModelSchemaRef(DescriptionComplaint),
         },
       },
     },
   })
-  async find(): Promise<DescriptionComplaints[]> {
-    const data = await this.descriptionComplaintRepository.find({
-      include: [
-        {
-          relation: 'user',
-          scope: {
-            fields: {
-              userID: true,
-              nationalCode: true,
-            },
-          }
+  async find(
+    @param.path.string('id') id: string,
+    @param.path.number("skip") skip: number,
+    @param.path.number("limit") limit: number,
+  ): Promise<DescriptionComplaint[]> {
+    const USERID = new ObjectId(id)
+    const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
+    const data = await repository.aggregate([
+      {
+        $skip: skip
+      },
+      {
+        $limit: limit
+      },
+      {
+        $match: {
+          nationalCodeUserID: USERID,
         }
-      ], fields: {
-        nationalCodeUserID: true,
-        codeDescriptionComplaint: true,
-        titleDescriptionComplaint: true,
-        complaintResult: true
+      },
+      {
+        $project: {
+          _id: 1,
+          nationalCodeUserID: 1,
+          codeDescriptionComplaint: 1,
+          titleDescriptionComplaint: 1,
+          complaintResult: 1
+        }
+      },
+      {
+        $lookup: {
+          from: "User",
+          let: {userId: "$nationalCodeUserID"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$_id', '$$userId']},
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                nationalCode: 1,
+              }
+            }
+          ],
+          as: "users"
+        }
       }
-    });
-
-    // const col = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
-    // const aa = await col.aggregate([{
-    //   "$lookup": {
-    //     "from": "User",
-    //     "localField": "nationalCodeUserID",
-    //     "foreignField": "_id",
-    //     "as": "users"
-    //   }
-    // }]).get()
-    // console.log(aa);
-
+    ]).get()
 
     return data;
   }
@@ -101,15 +120,14 @@ export class DescriptionComplaintController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(DescriptionComplaints),
+        schema: getModelSchemaRef(DescriptionComplaint),
       },
     },
   })
   async findBycode(
     @param.path.string('code') code: string
-  ): Promise<DescriptionComplaints> {
+  ): Promise<DescriptionComplaint | null> {
     const data = await this.descriptionComplaintRepository.findOne({where: {codeDescriptionComplaint: code}, fields: {codeDescriptionComplaint: true, titleDescriptionComplaint: true, complaintResult: true}});
-    if (!data) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     return data;
   }
 
@@ -132,14 +150,14 @@ export class DescriptionComplaintController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(DescriptionComplaints),
+        schema: getModelSchemaRef(DescriptionComplaint),
       },
     },
   })
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
-  ): Promise<DescriptionComplaints[]> {
+  ): Promise<DescriptionComplaint[]> {
     const data = await this.descriptionComplaintRepository.find({where: {datePresence: {between: [start, end]}}, fields: {codeDescriptionComplaint: true, titleDescriptionComplaint: true, complaintResult: true}});
     return data;
   }
