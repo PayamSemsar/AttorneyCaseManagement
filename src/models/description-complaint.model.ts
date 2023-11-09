@@ -31,7 +31,7 @@ export class DescriptionComplaint extends Entity {
     required: true,
     type: 'string'
   })
-  nationalCodeUserID: string;
+  nationalCodeUser: string;
 
   @property({
     type: 'number',

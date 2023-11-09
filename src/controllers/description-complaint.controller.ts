@@ -41,14 +41,18 @@ export class DescriptionComplaintController {
     })
     descriptionComplaint: DescriptionComplaint,
   ): Promise<void> {
-    const nationalCodeUserFind = await this.userRepository.findOne({where: {userID: descriptionComplaint.nationalCodeUserID}})
+    const nationalCodeUserFind = await this.userRepository.findOne({
+      where: {
+        nationalCode: descriptionComplaint.nationalCodeUser
+      }
+    })
     if (!nationalCodeUserFind) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     const timeNow = dateNow();
     if (timeNow > descriptionComplaint.datePresence) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     await this.descriptionComplaintRepository.create(descriptionComplaint);
   }
 
-  @get('/description-complaints/{skip}/{limit}/{uid}')
+  @get('/description-complaints/{skip}/{limit}/{ncode}')
   @response(200, {
     content: {
       'application/json': {
@@ -60,58 +64,24 @@ export class DescriptionComplaintController {
     },
   })
   async find(
-    @param.path.string('uid') id: string,
+    @param.path.string('ncode') ncode: string,
     @param.path.number("skip") skip: number,
     @param.path.number("limit") limit: number,
   ): Promise<DescriptionComplaint[]> {
-    const USERID = new ObjectId(id)
-    const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
-    const data = await repository.aggregate([
-      {
-        $skip: skip
+    const data = await this.descriptionComplaintRepository.find({
+      skip,
+      limit,
+      where: {
+        nationalCodeUser: ncode
       },
-      {
-        $limit: limit
-      },
-      {
-        $match: {
-          nationalCodeUserID: USERID,
-        }
-      },
-      {
-        $project: {
-          _id: 1,
-          // nationalCodeUserID: 1,
-          codeDescriptionComplaint: 1,
-          titleDescriptionComplaint: 1,
-          complaintResult: 1
-        }
-      },
-      // {
-      //   $lookup: {
-      //     from: "User",
-      //     let: {userId: "$nationalCodeUserID"},
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: {
-      //             $and: [
-      //               {$eq: ['$_id', '$$userId']},
-      //             ]
-      //           }
-      //         }
-      //       },
-      //       {
-      //         $project: {
-      //           _id: 1,
-      //           nationalCode: 1,
-      //         }
-      //       }
-      //     ],
-      //     as: "users"
-      //   }
-      // }
-    ]).get()
+      fields: {
+        descriptionComplaintID: true,
+        nationalCodeUser: true,
+        codeDescriptionComplaint: true,
+        titleDescriptionComplaint: true,
+        complaintResult: true,
+      }
+    })
 
     return data;
   }
@@ -126,8 +96,19 @@ export class DescriptionComplaintController {
   })
   async findBycode(
     @param.path.string('code') code: string
-  ): Promise<DescriptionComplaint | null> {
-    const data = await this.descriptionComplaintRepository.findOne({where: {codeDescriptionComplaint: code}, fields: {codeDescriptionComplaint: true, titleDescriptionComplaint: true, complaintResult: true}});
+  ): Promise<DescriptionComplaint> {
+    const data = await this.descriptionComplaintRepository.findOne({
+      where: {
+        codeDescriptionComplaint: code
+      },
+      fields: {
+        nationalCodeUser: true,
+        codeDescriptionComplaint: true,
+        titleDescriptionComplaint: true,
+        complaintResult: true
+      }
+    });
+    if (!data) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     return data;
   }
 
@@ -143,7 +124,18 @@ export class DescriptionComplaintController {
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
   ): Promise<DescriptionComplaint[]> {
-    const data = await this.descriptionComplaintRepository.find({where: {datePresence: {between: [start, end]}}, fields: {codeDescriptionComplaint: true, titleDescriptionComplaint: true, complaintResult: true}});
+    const data = await this.descriptionComplaintRepository.find({
+      where: {
+        datePresence: {
+          between: [start, end]
+        }
+      },
+      fields: {
+        codeDescriptionComplaint: true,
+        titleDescriptionComplaint: true,
+        complaintResult: true
+      }
+    });
     return data;
   }
 

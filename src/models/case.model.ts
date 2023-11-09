@@ -21,22 +21,22 @@ export class Case extends Entity {
     type: 'string',
     required: true,
   })
-  userNationalCodeID: string;
+  userNationalCode: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  codeDescriptionComplaintID: string;
+  codeDescriptionComplaint: string;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
     jsonSchema: {
       minimum: 0,
     },
   })
-  petitionNumber: string;
+  petitionNumber: number;
 
   @property({
     type: 'number',
@@ -45,22 +45,22 @@ export class Case extends Entity {
   dateSet: number;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
     jsonSchema: {
       minimum: 0,
     },
   })
-  caseNumber: string;
+  caseNumber: number;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
     jsonSchema: {
       minimum: 0,
     },
   })
-  branchArchiveNumber: string;
+  branchArchiveNumber: number;
 
   @property({
     type: 'array',

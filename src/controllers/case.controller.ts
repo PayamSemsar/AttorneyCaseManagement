@@ -41,9 +41,17 @@ export class CaseController {
     })
     createCase: Case,
   ): Promise<void> {
-    const findNationalCodeUser = this.userRepository.findOne({where: {userID: createCase.userNationalCodeID}});
+    const findNationalCodeUser = this.userRepository.findOne({
+      where: {
+        nationalCode: createCase.userNationalCode
+      }
+    });
     if (!findNationalCodeUser) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
-    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({where: {descriptionComplaintID: createCase.codeDescriptionComplaintID}});
+    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({
+      where: {
+        codeDescriptionComplaint: createCase.codeDescriptionComplaint
+      }
+    });
     if (!findCodeDescriptionComplaint) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     const timeNow = dateNow();
     if (!(timeNow < createCase.dateSet)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");

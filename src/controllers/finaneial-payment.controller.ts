@@ -24,6 +24,7 @@ import {FinaneialPayment} from '../models';
 import {DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services';
 import {FileUploadHandler} from '../types';
+var ObjectId = require('mongodb').ObjectId;
 
 @authenticate('token')
 @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
@@ -57,7 +58,11 @@ export class FinaneialPaymentController {
 
 
     // check value
-    const findNationalCodeUser = this.userRepository.findOne({where: {userID: dataReq.fields.nationalCodeUserID}});
+    const findNationalCodeUser = this.userRepository.findOne({
+      where: {
+        nationalCode: dataReq.fields.nationalCodeUser
+      }
+    });
     if (!findNationalCodeUser) {
       for (let i = 0; i < dataReq.files.length; i++) {
         fs.unlink(dataReq.files[i].path, (err) => {
@@ -67,7 +72,11 @@ export class FinaneialPaymentController {
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
-    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({where: {descriptionComplaintID: dataReq.fields.codeDescriptionComplaintID}});
+    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({
+      where: {
+        codeDescriptionComplaint: dataReq.fields.codeDescriptionComplaint
+      }
+    });
     if (!findCodeDescriptionComplaint) {
       for (let i = 0; i < dataReq.files.length; i++) {
         fs.unlink(dataReq.files[i].path, (err) => {
@@ -100,8 +109,7 @@ export class FinaneialPaymentController {
     // file name
     dataReq.fields.fileImage = []
     for (let i = 0; i < dataReq.files.length; i++) {
-      const filename = dataReq.files[i].path.split("/");
-      dataReq.fields.fileImage.push(filename[(filename.length) - 1])
+      dataReq.fields.fileImage.push(dataReq.files[i].filename)
     }
 
     await this.finaneialPaymentRepository.create(dataReq.fields);
@@ -125,7 +133,7 @@ export class FinaneialPaymentController {
   }
 
 
-  @get('/finaneial-payments')
+  @get('/finaneial-payments/{ncode}')
   @response(200, {
     content: {
       'application/json': {
@@ -136,8 +144,22 @@ export class FinaneialPaymentController {
       },
     },
   })
-  async find(): Promise<FinaneialPayment[]> {
-    const data = await this.finaneialPaymentRepository.find();
+  async find(
+    @param.path.string('ncode') ncode: string,
+  ): Promise<FinaneialPayment[]> {
+    // const USERID = new ObjectId(id)
+    const findUserByNCODE = await this.userRepository.findOne({
+      where: {
+        nationalCode: ncode
+      },
+      fields: {
+        userID: true
+      }
+    })
+    if (!findUserByNCODE) throw new HttpErrors[400];
+
+    const data = await this.finaneialPaymentRepository.find({where: {nationalCodeUser: ncode}})
+
     return data;
   }
 
@@ -155,8 +177,14 @@ export class FinaneialPaymentController {
     @param.path.number('end') end: number,
   ): Promise<FinaneialPayment[]> {
     const data = await this.finaneialPaymentRepository.find({
-      where: {date: {between: [start, end]}},
-      fields: {codeDescriptionComplaintID: false, nationalCodeUserID: false}
+      where: {
+        date: {
+          between: [start, end]
+        }
+      },
+      fields: {
+        codeDescriptionComplaint: false, nationalCodeUser: false
+      }
     });
     return data;
   }

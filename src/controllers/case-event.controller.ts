@@ -54,7 +54,11 @@ export class CaseEventController {
 
 
     // check value
-    const findCodeCase = await this.caseRepository.findOne({where: {caseID: dataReq.fields.codeCaseID}});
+    const findCodeCase = await this.caseRepository.findOne({
+      where: {
+        codeCase: dataReq.fields.codeCase
+      }
+    });
     if (!findCodeCase) {
       for (let i = 0; i < dataReq.files.length; i++) {
         fs.unlink(dataReq.files[i].path, (err) => {
@@ -96,8 +100,7 @@ export class CaseEventController {
     // name file
     dataReq.fields.fileImage = []
     for (let i = 0; i < dataReq.files.length; i++) {
-      const filename = dataReq.files[i].path.split("/");
-      dataReq.fields.fileImage.push(filename[(filename.length) - 1])
+      dataReq.fields.fileImage.push(dataReq.files[i].filename)
     }
 
     await this.caseEventRepository.create(dataReq.fields);

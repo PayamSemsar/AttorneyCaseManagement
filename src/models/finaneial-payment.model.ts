@@ -13,13 +13,13 @@ export class FinaneialPayment extends Entity {
     type: 'string',
     required: true,
   })
-  nationalCodeUserID: string;
+  nationalCodeUser: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  codeDescriptionComplaintID: string;
+  codeDescriptionComplaint: string;
 
   @property({
     type: 'number',
