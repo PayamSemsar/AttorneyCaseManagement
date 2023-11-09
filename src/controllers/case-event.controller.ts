@@ -125,7 +125,7 @@ export class CaseEventController {
   }
 
 
-  @get('/case-events')
+  @get('/case-events/{skip}/{limit}/{cCode}')
   @response(200, {
     content: {
       'application/json': {
@@ -136,8 +136,12 @@ export class CaseEventController {
       },
     },
   })
-  async find(): Promise<CaseEvent[]> {
-    const data = await this.caseEventRepository.find();
+  async find(
+    @param.path.number('skip') skip: number,
+    @param.path.number('limit') limit: number,
+    @param.path.string('cCode') cCode: string,
+  ): Promise<CaseEvent[]> {
+    const data = await this.caseEventRepository.find({skip, limit, where: {codeCase: cCode}});
     return data;
   }
 

@@ -42,7 +42,7 @@ export class FinaneialPaymentController {
 
 
     // check file is it and type
-    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات فایل وجود دارد");
     const fileTypes = ["jpg", "png"];
     for (let i = 0; i < dataReq.files.length; i++) {
       const extName = dataReq.files[i].originalname.split(".");
@@ -58,21 +58,22 @@ export class FinaneialPaymentController {
 
 
     // check value
-    const findNationalCodeUser = this.userRepository.findOne({
+    const findNationalCodeUser = await this.userRepository.findOne({
       where: {
         nationalCode: dataReq.fields.nationalCodeUser
       }
     });
+
     if (!findNationalCodeUser) {
       for (let i = 0; i < dataReq.files.length; i++) {
         fs.unlink(dataReq.files[i].path, (err) => {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات کاربر وجود دارد");
     };
 
-    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({
+    const findCodeDescriptionComplaint = await this.descriptionComplaintRepository.findOne({
       where: {
         codeDescriptionComplaint: dataReq.fields.codeDescriptionComplaint
       }
@@ -83,7 +84,7 @@ export class FinaneialPaymentController {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات شرح شکایت وجود دارد");
     };
 
     if (dataReq.fields.price < 1000) {
@@ -92,7 +93,7 @@ export class FinaneialPaymentController {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات قیمت وجود دارد");
     };
 
     const timeNow = dateNow();
@@ -102,7 +103,7 @@ export class FinaneialPaymentController {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات زمان وجود دارد");
     };
 
 
@@ -147,18 +148,46 @@ export class FinaneialPaymentController {
   async find(
     @param.path.string('ncode') ncode: string,
   ): Promise<FinaneialPayment[]> {
-    // const USERID = new ObjectId(id)
-    const findUserByNCODE = await this.userRepository.findOne({
-      where: {
-        nationalCode: ncode
-      },
-      fields: {
-        userID: true
-      }
-    })
-    if (!findUserByNCODE) throw new HttpErrors[400];
 
-    const data = await this.finaneialPaymentRepository.find({where: {nationalCodeUser: ncode}})
+    const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
+    const data = await repository.aggregate([
+      {
+        $match: {
+          nationalCode: ncode,
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          nationalCode: 1
+        }
+      },
+      {
+        $lookup: {
+          from: "FinaneialPayment",
+          let: {natCode: "$nationalCode"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$nationalCodeUser', '$$natCode']},
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+              }
+            }
+          ],
+          as: "finaneialPayments"
+        }
+      }
+    ]).get()
 
     return data;
   }
