@@ -47,8 +47,10 @@ export class DescriptionComplaintController {
       }
     })
     if (!nationalCodeUserFind) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+
     const timeNow = dateNow();
     if (timeNow > descriptionComplaint.datePresence) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+
     descriptionComplaint.codeDescriptionComplaint = codeGenerator()
     await this.descriptionComplaintRepository.create(descriptionComplaint);
   }

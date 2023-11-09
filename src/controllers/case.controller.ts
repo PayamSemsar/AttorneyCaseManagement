@@ -74,10 +74,10 @@ export class CaseController {
 
     const findCaseNumber = await this.caseRepository.findOne({
       where: {
-        codeCase: createCase.codeCase
+        caseNumber: createCase.caseNumber
       },
       fields: {
-        codeCase: true
+        caseNumber: true
       }
     });
     if (findCaseNumber) throw new HttpErrors[400]("مقدار نکراری در اطلاعات وجود دارد");
