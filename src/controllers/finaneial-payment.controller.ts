@@ -39,8 +39,9 @@ export class FinaneialPaymentController {
   async creating(request: Request) {
     const dataReq: any = {files: request.files, fields: request.body}
 
-    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
 
+    // check file is it and type
+    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     const fileTypes = ["jpg", "png"];
     for (let i = 0; i < dataReq.files.length; i++) {
       const extName = dataReq.files[i].originalname.split(".");
@@ -54,37 +55,49 @@ export class FinaneialPaymentController {
       }
     }
 
-    const findNationalCodeUser = this.userRepository.findOne({where: {nationalCode: dataReq.fields.userNationalCode}});
+
+    // check value
+    const findNationalCodeUser = this.userRepository.findOne({where: {userID: dataReq.fields.nationalCodeUserID}});
     if (!findNationalCodeUser) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
-    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({where: {codeDescriptionComplaint: dataReq.fields.codeDescriptionComplaint}});
+    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({where: {descriptionComplaintID: dataReq.fields.codeDescriptionComplaintID}});
     if (!findCodeDescriptionComplaint) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
     if (dataReq.fields.price < 1000) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
     const timeNow = dateNow();
     if (!(timeNow < dataReq.fields.date)) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
+
+    // file name
     dataReq.fields.fileImage = []
     for (let i = 0; i < dataReq.files.length; i++) {
       const filename = dataReq.files[i].path.split("/");
@@ -143,7 +156,7 @@ export class FinaneialPaymentController {
   ): Promise<FinaneialPayment[]> {
     const data = await this.finaneialPaymentRepository.find({
       where: {date: {between: [start, end]}},
-      fields: {codeDescriptionComplaint: false, nationalCodeUserID: false}
+      fields: {codeDescriptionComplaintID: false, nationalCodeUserID: false}
     });
     return data;
   }

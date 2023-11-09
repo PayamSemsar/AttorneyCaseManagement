@@ -13,7 +13,7 @@ import {
 } from '@loopback/rest';
 import {RoleKeys} from '../enums';
 import {RefreshTokenServiceBindings, TokenServiceBindings, UserServiceBindings} from '../jwt-authentication';
-import {FinaneialPayment, Token, User, UserLogin, UserRefreshToken} from '../models';
+import {Token, User, UserLogin, UserRefreshToken} from '../models';
 import {DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
 import {basicAuthorization, RefreshTokenService, TokenService, UserService} from '../services';
 import {Tokens} from '../types/token.type';
@@ -51,6 +51,7 @@ export class UserController {
     if (!(PN.join('') == "09")) throw new HttpErrors[422]('مفادیر صحیح نمیباشند');
     await this.userRepository.create(user);
   }
+
 
   @authenticate('token')
   @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
@@ -95,29 +96,6 @@ export class UserController {
     return data;
   }
 
-
-
-  @authenticate('token')
-  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
-  @get("/user/finaneial-payment/{id}")
-  @response(200, {
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(FinaneialPayment, {
-          exclude: ['nationalCodeUserID', "codeDescriptionComplaint"]
-        })
-      },
-    },
-  })
-  async getFinaneialPaymentUser(
-    @param.path.string("id") userId: string,
-  ): Promise<FinaneialPayment[]> {
-    const data = await this.finaneialPaymentRepository.find({
-      where: {nationalCodeUserID: userId},
-      fields: {nationalCodeUserID: false, codeDescriptionComplaint: false}
-    });
-    return data;
-  }
 
 
   // auth ---------------------------------------------->

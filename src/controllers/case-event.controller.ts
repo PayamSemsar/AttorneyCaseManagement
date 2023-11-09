@@ -32,11 +32,13 @@ export class CaseEventController {
     @repository(CaseEventRepository) public caseEventRepository: CaseEventRepository,
     @repository(CaseRepository) public caseRepository: CaseRepository,
   ) { }
+
   async creating(request: Request) {
     const dataReq: any = {files: request.files, fields: request.body}
 
-    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
 
+    // check img is it and type
+    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     const fileTypes = ["jpg", "png"];
     for (let i = 0; i < dataReq.files.length; i++) {
       const extName = dataReq.files[i].originalname.split(".");
@@ -50,39 +52,48 @@ export class CaseEventController {
       }
     }
 
-    const findCodeCase = await this.caseRepository.findOne({where: {codeCase: dataReq.fields.codeCase}});
+
+    // check value
+    const findCodeCase = await this.caseRepository.findOne({where: {caseID: dataReq.fields.codeCaseID}});
     if (!findCodeCase) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
-    };
-    const timeNow = dateNow();
-    if (!(timeNow < dataReq.fields.dateRecord)) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
-    };
-    if (dataReq.fields.dateRecord > dataReq.fields.dateDo) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
-    };
-    if (!dataReq.fields.descriptionEvent) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
-    };
-    if (!dataReq.fields.codeCase) {
-      fs.unlink(dataReq.files[0].path, (err) => {
-        if (err) console.log(err);
-      });
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
     };
 
+    const timeNow = dateNow();
+    if (!(timeNow < dataReq.fields.dateRecord)) {
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
+      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
+    };
+
+    if (dataReq.fields.dateRecord > dataReq.fields.dateDo) {
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
+      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
+    };
+
+    if (!dataReq.fields.descriptionEvent) {
+      for (let i = 0; i < dataReq.files.length; i++) {
+        fs.unlink(dataReq.files[i].path, (err) => {
+          if (err) console.log(err);
+        });
+      }
+      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
+    };
+
+
+    // name file
     dataReq.fields.fileImage = []
     for (let i = 0; i < dataReq.files.length; i++) {
       const filename = dataReq.files[i].path.split("/");
@@ -100,14 +111,6 @@ export class CaseEventController {
     request: Request,
     @inject(RestBindings.Http.RESPONSE) response: Response,
   ): Promise<void> {
-    // const findCodeCase = await this.caseRepository.findOne({where: {codeCase: createCaseEvent.codeCase}});
-    // if (!findCodeCase) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
-    // const timeNow = dateNow();
-    // if (!(timeNow < createCaseEvent.dateRecord)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
-    // if (createCaseEvent.dateRecord > createCaseEvent.dateDo) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
-
-    // await this.caseEventRepository.create(createCaseEvent);
-
     await new Promise<object>((resolve, reject) => {
       this.handler(request, response, (err: any) => {
         if (err) reject(err);
@@ -117,6 +120,7 @@ export class CaseEventController {
       });
     })
   }
+
 
   @get('/case-events')
   @response(200, {
@@ -133,22 +137,6 @@ export class CaseEventController {
     const data = await this.caseEventRepository.find();
     return data;
   }
-
-  // @get('/case-event/{id}')
-  // @response(200, {
-  //   content: {
-  //     'application/json': {
-  //       schema: getModelSchemaRef(CaseEvent),
-  //     },
-  //   },
-  // })
-  // async findById(
-  //   @param.path.string('id') id: string,
-  // ): Promise<CaseEvent> {
-  //   const data = await this.caseEventRepository.findById(id);
-  //   return data;
-  // }
-
 
 
   @get('/case-event/{start}/{end}')

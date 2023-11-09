@@ -19,7 +19,7 @@ export class FinaneialPayment extends Entity {
     type: 'string',
     required: true,
   })
-  codeDescriptionComplaint: string;
+  codeDescriptionComplaintID: string;
 
   @property({
     type: 'number',

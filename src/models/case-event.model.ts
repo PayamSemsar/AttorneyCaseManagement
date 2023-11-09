@@ -23,7 +23,7 @@ export class CaseEvent extends Entity {
     type: 'string',
     required: true,
   })
-  codeCase: string;
+  codeCaseID: string;
 
   @property({
     type: 'array',

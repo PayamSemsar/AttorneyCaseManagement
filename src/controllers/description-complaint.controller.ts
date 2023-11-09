@@ -12,7 +12,7 @@ import {
 } from '@loopback/rest';
 import {RoleKeys} from '../enums';
 import {dateNow} from '../helpers';
-import {DescriptionComplaint, FinaneialPayment} from '../models';
+import {DescriptionComplaint} from '../models';
 import {CaseRepository, DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services';
 var ObjectId = require('mongodb').ObjectId;
@@ -48,7 +48,7 @@ export class DescriptionComplaintController {
     await this.descriptionComplaintRepository.create(descriptionComplaint);
   }
 
-  @get('/description-complaints/{skip}/{limit}/{id}')
+  @get('/description-complaints/{skip}/{limit}/{uid}')
   @response(200, {
     content: {
       'application/json': {
@@ -60,7 +60,7 @@ export class DescriptionComplaintController {
     },
   })
   async find(
-    @param.path.string('id') id: string,
+    @param.path.string('uid') id: string,
     @param.path.number("skip") skip: number,
     @param.path.number("limit") limit: number,
   ): Promise<DescriptionComplaint[]> {
@@ -81,36 +81,36 @@ export class DescriptionComplaintController {
       {
         $project: {
           _id: 1,
-          nationalCodeUserID: 1,
+          // nationalCodeUserID: 1,
           codeDescriptionComplaint: 1,
           titleDescriptionComplaint: 1,
           complaintResult: 1
         }
       },
-      {
-        $lookup: {
-          from: "User",
-          let: {userId: "$nationalCodeUserID"},
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    {$eq: ['$_id', '$$userId']},
-                  ]
-                }
-              }
-            },
-            {
-              $project: {
-                _id: 1,
-                nationalCode: 1,
-              }
-            }
-          ],
-          as: "users"
-        }
-      }
+      // {
+      //   $lookup: {
+      //     from: "User",
+      //     let: {userId: "$nationalCodeUserID"},
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           $expr: {
+      //             $and: [
+      //               {$eq: ['$_id', '$$userId']},
+      //             ]
+      //           }
+      //         }
+      //       },
+      //       {
+      //         $project: {
+      //           _id: 1,
+      //           nationalCode: 1,
+      //         }
+      //       }
+      //     ],
+      //     as: "users"
+      //   }
+      // }
     ]).get()
 
     return data;
@@ -128,21 +128,6 @@ export class DescriptionComplaintController {
     @param.path.string('code') code: string
   ): Promise<DescriptionComplaint | null> {
     const data = await this.descriptionComplaintRepository.findOne({where: {codeDescriptionComplaint: code}, fields: {codeDescriptionComplaint: true, titleDescriptionComplaint: true, complaintResult: true}});
-    return data;
-  }
-
-  @get('/description-complaint/finaneial-payments/{code}')
-  @response(200, {
-    content: {
-      'application/json': {
-        schema: getModelSchemaRef(FinaneialPayment),
-      },
-    },
-  })
-  async findFinaneialPaymentBycode(
-    @param.path.string('code') code: string
-  ): Promise<FinaneialPayment[]> {
-    const data = await this.finaneialPaymentRepository.find({where: {codeDescriptionComplaint: code}, fields: {codeDescriptionComplaint: false, nationalCodeUserID: false}});
     return data;
   }
 

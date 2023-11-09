@@ -6,4 +6,4 @@ export * from './ping.controller';
 export * from './reminder-custom.controller';
 export * from './user.controller';
 
-export * from './file-upload.controller';
+export * from './file-managment.controller';

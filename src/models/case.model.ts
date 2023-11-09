@@ -21,13 +21,13 @@ export class Case extends Entity {
     type: 'string',
     required: true,
   })
-  userNationalCode: string;
+  userNationalCodeID: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  codeDescriptionComplaint: string;
+  codeDescriptionComplaintID: string;
 
   @property({
     type: 'string',

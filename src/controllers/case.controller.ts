@@ -41,9 +41,9 @@ export class CaseController {
     })
     createCase: Case,
   ): Promise<void> {
-    const findNationalCodeUser = this.userRepository.findOne({where: {nationalCode: createCase.userNationalCode}});
+    const findNationalCodeUser = this.userRepository.findOne({where: {userID: createCase.userNationalCodeID}});
     if (!findNationalCodeUser) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
-    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({where: {codeDescriptionComplaint: createCase.codeDescriptionComplaint}});
+    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({where: {descriptionComplaintID: createCase.codeDescriptionComplaintID}});
     if (!findCodeDescriptionComplaint) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     const timeNow = dateNow();
     if (!(timeNow < createCase.dateSet)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
@@ -66,22 +66,4 @@ export class CaseController {
     const data = await this.caseRepository.find();
     return data;
   }
-
-
-  // @get('/cases/{id}')
-  // @response(200, {
-  //   content: {
-  //     'application/json': {
-  //       schema: getModelSchemaRef(Case),
-  //     },
-  //   },
-  // })
-  // async findById(
-  //   @param.path.string('id') id: string,
-  // ): Promise<Case> {
-  //   const data = await this.caseRepository.findById(id);
-  //   return data;
-  // }
-
-
 }
