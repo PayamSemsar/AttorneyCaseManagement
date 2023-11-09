@@ -11,7 +11,7 @@ import {
   response
 } from '@loopback/rest';
 import {RoleKeys} from '../enums';
-import {dateNow} from '../helpers';
+import {codeGenerator, dateNow} from '../helpers';
 import {DescriptionComplaint} from '../models';
 import {CaseRepository, DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services';
@@ -49,6 +49,7 @@ export class DescriptionComplaintController {
     if (!nationalCodeUserFind) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     const timeNow = dateNow();
     if (timeNow > descriptionComplaint.datePresence) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+    descriptionComplaint.codeDescriptionComplaint = codeGenerator()
     await this.descriptionComplaintRepository.create(descriptionComplaint);
   }
 
@@ -63,7 +64,7 @@ export class DescriptionComplaintController {
       },
     },
   })
-  async find(
+  async findWithSkipAndLimitByNCode(
     @param.path.string('ncode') ncode: string,
     @param.path.number("skip") skip: number,
     @param.path.number("limit") limit: number,
@@ -71,6 +72,36 @@ export class DescriptionComplaintController {
     const data = await this.descriptionComplaintRepository.find({
       skip,
       limit,
+      where: {
+        nationalCodeUser: ncode
+      },
+      fields: {
+        descriptionComplaintID: true,
+        nationalCodeUser: true,
+        codeDescriptionComplaint: true,
+        titleDescriptionComplaint: true,
+        complaintResult: true,
+      }
+    })
+
+    return data;
+  }
+
+  @get('/description-complaints/{ncode}')
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(DescriptionComplaint),
+        },
+      },
+    },
+  })
+  async findByNCode(
+    @param.path.string('ncode') ncode: string,
+  ): Promise<DescriptionComplaint[]> {
+    const data = await this.descriptionComplaintRepository.find({
       where: {
         nationalCodeUser: ncode
       },
@@ -112,7 +143,7 @@ export class DescriptionComplaintController {
     return data;
   }
 
-  @get('/description-complaint/{start}/{end}')
+  @get('/description-complaints/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {

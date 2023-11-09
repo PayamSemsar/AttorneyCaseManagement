@@ -42,18 +42,57 @@ export class CaseController {
     })
     createCase: Case,
   ): Promise<void> {
-    const findNationalCodeUser = this.userRepository.findOne({
+    const findNationalCodeUser = await this.userRepository.findOne({
       where: {
         nationalCode: createCase.userNationalCode
+      },
+      fields: {
+        nationalCode: true
       }
     });
     if (!findNationalCodeUser) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
-    const findCodeDescriptionComplaint = this.descriptionComplaintRepository.findOne({
+
+    const findCodeDescriptionComplaint = await this.descriptionComplaintRepository.findOne({
       where: {
         codeDescriptionComplaint: createCase.codeDescriptionComplaint
+      },
+      fields: {
+        codeDescriptionComplaint: true
       }
     });
     if (!findCodeDescriptionComplaint) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+
+    const findPetitionNumber = await this.caseRepository.findOne({
+      where: {
+        petitionNumber: createCase.petitionNumber
+      },
+      fields: {
+        petitionNumber: true
+      }
+    });
+    if (findPetitionNumber) throw new HttpErrors[400]("مقدار نکراری در اطلاعات وجود دارد");
+
+    const findCaseNumber = await this.caseRepository.findOne({
+      where: {
+        codeCase: createCase.codeCase
+      },
+      fields: {
+        codeCase: true
+      }
+    });
+    if (findCaseNumber) throw new HttpErrors[400]("مقدار نکراری در اطلاعات وجود دارد");
+
+    const findBranchArchiveNumber = await this.caseRepository.findOne({
+      where: {
+        branchArchiveNumber: createCase.branchArchiveNumber
+      },
+      fields: {
+        branchArchiveNumber: true
+      }
+    });
+    if (findBranchArchiveNumber) throw new HttpErrors[400]("مقدار نکراری در اطلاعات وجود دارد");
+
+
     const timeNow = dateNow();
     if (!(timeNow < createCase.dateSet)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
 

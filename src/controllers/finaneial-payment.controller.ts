@@ -42,7 +42,7 @@ export class FinaneialPaymentController {
 
 
     // check file is it and type
-    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات فایل وجود دارد");
+    if (dataReq.files[0] == undefined) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     const fileTypes = ["jpg", "png"];
     for (let i = 0; i < dataReq.files.length; i++) {
       const extName = dataReq.files[i].originalname.split(".");
@@ -70,7 +70,7 @@ export class FinaneialPaymentController {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات کاربر وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
     const findCodeDescriptionComplaint = await this.descriptionComplaintRepository.findOne({
@@ -84,7 +84,7 @@ export class FinaneialPaymentController {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات شرح شکایت وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
     if (dataReq.fields.price < 1000) {
@@ -93,7 +93,7 @@ export class FinaneialPaymentController {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات قیمت وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
     const timeNow = dateNow();
@@ -103,7 +103,7 @@ export class FinaneialPaymentController {
           if (err) console.log(err);
         });
       }
-      throw new HttpErrors[400]("مشکل در اطلاعات زمان وجود دارد");
+      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
 
@@ -192,8 +192,29 @@ export class FinaneialPaymentController {
     return data;
   }
 
+  @get('/finaneial-payments/{dcCode}')
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(FinaneialPayment),
+        },
+      },
+    },
+  })
+  async findByDcCode(
+    @param.path.string('dcCode') dcCode: string,
+  ): Promise<FinaneialPayment[]> {
+    const data = await this.finaneialPaymentRepository.find({
+      where: {
+        codeDescriptionComplaint: dcCode
+      }
+    })
+    return data;
+  }
 
-  @get('/finaneial-payment/{start}/{end}')
+  @get('/finaneial-payments/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {

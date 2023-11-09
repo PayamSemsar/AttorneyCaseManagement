@@ -1,5 +1,4 @@
 import {Entity, model, property} from '@loopback/repository';
-import {codeGenerator} from '../helpers';
 
 @model()
 export class DescriptionComplaint extends Entity {
@@ -13,7 +12,6 @@ export class DescriptionComplaint extends Entity {
   @property({
     type: 'string',
     required: true,
-    default: codeGenerator(),
   })
   codeDescriptionComplaint: string;
 

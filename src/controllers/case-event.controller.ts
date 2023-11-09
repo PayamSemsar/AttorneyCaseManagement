@@ -146,7 +146,7 @@ export class CaseEventController {
   }
 
 
-  @get('/case-event/{start}/{end}')
+  @get('/case-events/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
