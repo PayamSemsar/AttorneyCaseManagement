@@ -7,6 +7,7 @@ import {
   HttpErrors,
   get,
   getModelSchemaRef,
+  param,
   post,
   requestBody,
   response
@@ -59,7 +60,7 @@ export class CaseController {
     await this.caseRepository.create(createCase);
   }
 
-  @get('/cases')
+  @get('/cases/{skip}/{limit}/{dcCode}')
   @response(200, {
     content: {
       'application/json': {
@@ -70,8 +71,21 @@ export class CaseController {
       },
     },
   })
-  async find(): Promise<Case[]> {
-    const data = await this.caseRepository.find();
+  async find(
+    @param.path.string("dcCode") dcCode: string,
+    @param.path.number("skip") skip: number,
+    @param.path.number("limit") limit: number,
+  ): Promise<Case[]> {
+    const data = await this.caseRepository.find({
+      skip,
+      limit,
+      where: {
+        codeDescriptionComplaint: dcCode
+      },
+      fields: {
+
+      }
+    });
     return data;
   }
 }
