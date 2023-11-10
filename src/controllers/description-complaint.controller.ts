@@ -44,6 +44,9 @@ export class DescriptionComplaintController {
     const nationalCodeUserFind = await this.userRepository.findOne({
       where: {
         nationalCode: descriptionComplaint.nationalCodeUser
+      },
+      fields: {
+        nationalCode: true
       }
     })
     if (!nationalCodeUserFind) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
@@ -61,7 +64,9 @@ export class DescriptionComplaintController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(DescriptionComplaint),
+          items: getModelSchemaRef(DescriptionComplaint, {
+            exclude: ['datePresence', "descriptionComplaint"]
+          }),
         },
       },
     },
@@ -78,41 +83,8 @@ export class DescriptionComplaintController {
         nationalCodeUser: ncode
       },
       fields: {
-        descriptionComplaintID: true,
-        nationalCodeUser: true,
-        codeDescriptionComplaint: true,
-        titleDescriptionComplaint: true,
-        complaintResult: true,
-      }
-    })
-
-    return data;
-  }
-
-  @get('/description-complaints/{ncode}')
-  @response(200, {
-    content: {
-      'application/json': {
-        schema: {
-          type: 'array',
-          items: getModelSchemaRef(DescriptionComplaint),
-        },
-      },
-    },
-  })
-  async findByNCode(
-    @param.path.string('ncode') ncode: string,
-  ): Promise<DescriptionComplaint[]> {
-    const data = await this.descriptionComplaintRepository.find({
-      where: {
-        nationalCodeUser: ncode
-      },
-      fields: {
-        descriptionComplaintID: true,
-        nationalCodeUser: true,
-        codeDescriptionComplaint: true,
-        titleDescriptionComplaint: true,
-        complaintResult: true,
+        datePresence: false,
+        descriptionComplaint: false,
       }
     })
 
@@ -123,7 +95,9 @@ export class DescriptionComplaintController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(DescriptionComplaint),
+        schema: getModelSchemaRef(DescriptionComplaint, {
+          exclude: ['datePresence', 'descriptionComplaint', 'descriptionComplaintID']
+        }),
       },
     },
   })
@@ -145,6 +119,8 @@ export class DescriptionComplaintController {
     return data;
   }
 
+
+  // ----------------------------------------------
   @get('/description-complaints/{start}/{end}')
   @response(200, {
     content: {
@@ -163,13 +139,34 @@ export class DescriptionComplaintController {
           between: [start, end]
         }
       },
-      fields: {
-        codeDescriptionComplaint: true,
-        titleDescriptionComplaint: true,
-        complaintResult: true
-      }
+      // fields: {
+      // }
     });
     return data;
   }
 
+  @get('/description-complaints/{ncode}')
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(DescriptionComplaint),
+        },
+      },
+    },
+  })
+  async findByNCode(
+    @param.path.string('ncode') ncode: string,
+  ): Promise<DescriptionComplaint[]> {
+    const data = await this.descriptionComplaintRepository.find({
+      where: {
+        nationalCodeUser: ncode
+      },
+      // fields: {
+      // }
+    })
+
+    return data;
+  }
 }

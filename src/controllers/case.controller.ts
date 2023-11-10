@@ -106,7 +106,9 @@ export class CaseController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(Case),
+          items: getModelSchemaRef(Case, {
+            exclude: ['caseID']
+          }),
         },
       },
     },

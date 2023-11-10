@@ -131,7 +131,9 @@ export class CaseEventController {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(CaseEvent),
+          items: getModelSchemaRef(CaseEvent, {
+            exclude: ['caseEventID']
+          }),
         },
       },
     },
@@ -141,11 +143,22 @@ export class CaseEventController {
     @param.path.number('limit') limit: number,
     @param.path.string('cCode') cCode: string,
   ): Promise<CaseEvent[]> {
-    const data = await this.caseEventRepository.find({skip, limit, where: {codeCase: cCode}});
+    const data = await this.caseEventRepository.find({
+      skip,
+      limit,
+      where: {
+        codeCase: cCode
+      },
+      fields: {
+        caseEventID: false,
+      }
+    });
     return data;
   }
 
 
+
+  // ---------------------------------------
   @get('/case-events/{start}/{end}')
   @response(200, {
     content: {
@@ -158,7 +171,15 @@ export class CaseEventController {
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
   ): Promise<CaseEvent[]> {
-    const data = await this.caseEventRepository.find({where: {dateDo: {between: [start, end]}}, fields: {caseEventID: false}});
+    const data = await this.caseEventRepository.find({
+      where: {
+        dateDo: {
+          between: [start, end]
+        }
+      },
+      // fields: {
+      // }
+    });
     return data;
   }
 }

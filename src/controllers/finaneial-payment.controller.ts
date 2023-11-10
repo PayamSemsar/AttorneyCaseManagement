@@ -134,13 +134,16 @@ export class FinaneialPaymentController {
   }
 
 
+  // ----------------------------------------
   @get('/finaneial-payments/{ncode}')
   @response(200, {
     content: {
       'application/json': {
         schema: {
           type: 'array',
-          items: getModelSchemaRef(FinaneialPayment),
+          items: getModelSchemaRef(FinaneialPayment, {
+            exclude: ['finaneialPaymentID']
+          }),
         },
       },
     },
@@ -148,7 +151,6 @@ export class FinaneialPaymentController {
   async find(
     @param.path.string('ncode') ncode: string,
   ): Promise<FinaneialPayment[]> {
-
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
     const data = await repository.aggregate([
       {
@@ -232,9 +234,8 @@ export class FinaneialPaymentController {
           between: [start, end]
         }
       },
-      fields: {
-        codeDescriptionComplaint: false, nationalCodeUser: false
-      }
+      // fields: {
+      // }
     });
     return data;
   }
