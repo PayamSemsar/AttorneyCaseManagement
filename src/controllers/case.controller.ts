@@ -13,7 +13,7 @@ import {
   response
 } from '@loopback/rest';
 import {RoleKeys} from '../enums';
-import {codeGenerator, dateNow} from '../helpers';
+import {codeGenerator} from '../helpers';
 import {Case} from '../models';
 import {CaseRepository, DescriptionComplaintRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services';
@@ -93,8 +93,8 @@ export class CaseController {
     if (findBranchArchiveNumber) throw new HttpErrors[400]("مقدار نکراری در اطلاعات وجود دارد");
 
 
-    const timeNow = dateNow();
-    if (!(timeNow < createCase.dateSet)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+    // const timeNow = dateNow();
+    // if (!(timeNow < createCase.dateSet)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
 
     createCase.codeCase = codeGenerator()
     await this.caseRepository.create(createCase);

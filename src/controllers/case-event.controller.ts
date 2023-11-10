@@ -18,7 +18,6 @@ import {
 } from '@loopback/rest';
 import fs from "fs";
 import {RoleKeys} from '../enums';
-import {dateNow} from '../helpers';
 import {FILE_UPLOAD_SERVICE} from '../keys';
 import {CaseEvent} from '../models';
 import {CaseEventRepository, CaseRepository} from '../repositories';
@@ -68,15 +67,15 @@ export class CaseEventController {
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
     };
 
-    const timeNow = dateNow();
-    if (!(timeNow < dataReq.fields.dateRecord)) {
-      for (let i = 0; i < dataReq.files.length; i++) {
-        fs.unlink(dataReq.files[i].path, (err) => {
-          if (err) console.log(err);
-        });
-      }
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
-    };
+    // const timeNow = dateNow();
+    // if (!(timeNow < dataReq.fields.dateRecord)) {
+    //   for (let i = 0; i < dataReq.files.length; i++) {
+    //     fs.unlink(dataReq.files[i].path, (err) => {
+    //       if (err) console.log(err);
+    //     });
+    //   }
+    //   throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد")
+    // };
 
     if (dataReq.fields.dateRecord > dataReq.fields.dateDo) {
       for (let i = 0; i < dataReq.files.length; i++) {

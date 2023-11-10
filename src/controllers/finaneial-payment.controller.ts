@@ -18,7 +18,6 @@ import {
 } from '@loopback/rest';
 import fs from "fs";
 import {RoleKeys} from '../enums';
-import {dateNow} from '../helpers';
 import {FILE_UPLOAD_SERVICE} from '../keys';
 import {FinaneialPayment} from '../models';
 import {DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
@@ -96,15 +95,15 @@ export class FinaneialPaymentController {
       throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     };
 
-    const timeNow = dateNow();
-    if (!(timeNow < dataReq.fields.date)) {
-      for (let i = 0; i < dataReq.files.length; i++) {
-        fs.unlink(dataReq.files[i].path, (err) => {
-          if (err) console.log(err);
-        });
-      }
-      throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
-    };
+    // const timeNow = dateNow();
+    // if (!(timeNow < dataReq.fields.date)) {
+    //   for (let i = 0; i < dataReq.files.length; i++) {
+    //     fs.unlink(dataReq.files[i].path, (err) => {
+    //       if (err) console.log(err);
+    //     });
+    //   }
+    //   throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+    // };
 
 
     // file name

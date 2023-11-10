@@ -4,7 +4,6 @@ import {
   repository
 } from '@loopback/repository';
 import {
-  HttpErrors,
   get,
   getModelSchemaRef,
   post,
@@ -12,7 +11,6 @@ import {
   response
 } from '@loopback/rest';
 import {RoleKeys} from '../enums';
-import {dateNow} from '../helpers';
 import {ReminderCustom} from '../models';
 import {ReminderCustomRepository} from '../repositories';
 import {basicAuthorization} from '../services';
@@ -39,8 +37,8 @@ export class ReminderCustomController {
     })
     createReminderCustom: ReminderCustom,
   ): Promise<void> {
-    const timeNow = dateNow();
-    if (!(timeNow < createReminderCustom.reminderCustomDate)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+    // const timeNow = dateNow();
+    // if (!(timeNow < createReminderCustom.reminderCustomDate)) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
     await this.reminderCustomRepository.create(createReminderCustom);
   }
 
