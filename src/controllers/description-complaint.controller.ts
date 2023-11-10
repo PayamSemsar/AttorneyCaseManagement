@@ -159,13 +159,45 @@ export class DescriptionComplaintController {
   async findByNCode(
     @param.path.string('ncode') ncode: string,
   ): Promise<DescriptionComplaint[]> {
-    const data = await this.descriptionComplaintRepository.find({
-      where: {
-        nationalCodeUser: ncode
+    const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
+    const data = await repository.aggregate([
+      {
+        $match: {
+          nationalCode: ncode,
+        }
       },
-      // fields: {
-      // }
-    })
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          nationalCode: 1
+        }
+      },
+      {
+        $lookup: {
+          from: "DescriptionComplaint",
+          let: {natCode: "$nationalCode"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$nationalCodeUser', '$$natCode']},
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+              }
+            }
+          ],
+          as: "descriptionComplaints"
+        }
+      }
+    ]).get()
 
     return data;
   }
