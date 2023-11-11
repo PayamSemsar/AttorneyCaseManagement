@@ -228,10 +228,10 @@ export class DescriptionComplaintController {
         }
       },
       {
-        skip,
+        $skip: skip,
       },
       {
-        limit,
+        $limit: limit,
       },
       {
         $project: {

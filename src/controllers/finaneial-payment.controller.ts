@@ -202,10 +202,10 @@ export class FinaneialPaymentController {
         }
       },
       {
-        skip,
+        $skip: skip,
       },
       {
-        limit,
+        $limit: limit,
       },
       {
         $project: {
@@ -309,10 +309,10 @@ export class FinaneialPaymentController {
         }
       },
       {
-        skip
+        $skip: skip,
       },
       {
-        limit
+        $limit: limit,
       },
       {
         $project: {
