@@ -1,3 +1,5 @@
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
 import {inject} from '@loopback/core';
 import {
   get,
@@ -8,9 +10,14 @@ import {
   RestBindings
 } from '@loopback/rest';
 import path from 'path';
+import {RoleKeys} from '../enums';
 import {FILE_UPLOAD_SERVICE, STORAGE_DIRECTORY} from '../keys';
+import {basicAuthorization} from '../services';
 import {FileUploadHandler} from '../types';
 
+
+@authenticate('token')
+@authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
 export class FileManagment {
 
   constructor(
