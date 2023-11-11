@@ -121,7 +121,7 @@ export class DescriptionComplaintController {
 
 
   // ----------------------------------------------
-  @get('/description-complaints/{start}/{end}')
+  @get('/description-complaints/{skip}/{limiting}/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
@@ -132,15 +132,31 @@ export class DescriptionComplaintController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
+    @param.path.number('skip') skip: number,
+    @param.path.number('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
+    if (limit == "all") {
+      const data = await this.descriptionComplaintRepository.find({
+        where: {
+          datePresence: {
+            between: [start, end]
+          }
+        },
+      });
+      return data;
+    }
+
+
+    if (typeof limit != 'number') throw new HttpErrors[400](";/");
+
     const data = await this.descriptionComplaintRepository.find({
+      skip,
+      limit,
       where: {
         datePresence: {
           between: [start, end]
         }
       },
-      // fields: {
-      // }
     });
     return data;
   }
@@ -161,7 +177,7 @@ export class DescriptionComplaintController {
     @param.path.number('skip') skip: number,
     @param.path.number('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
-    const repository = await ((this.userRepository.dataSource.connector) as any).collection('User');
+    const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
     if (limit == "all") {
       const data = await repository.aggregate([
         {
@@ -173,20 +189,20 @@ export class DescriptionComplaintController {
           $project: {
             _id: 1,
             firstName: 1,
-            lastName: 1,
-            nationalCode: 1
+            familyName: 1,
+            nationalCode: 1,
           }
         },
         {
           $lookup: {
             from: "DescriptionComplaint",
-            let: {natCode: "$nationalCode"},
+            let: {nCode: "$nationalCode"},
             pipeline: [
               {
                 $match: {
                   $expr: {
                     $and: [
-                      {$eq: ['$nationalCodeUser', '$$natCode']},
+                      {$eq: ['$nationalCodeUser', '$$nCode']},
                     ]
                   }
                 }
@@ -204,6 +220,7 @@ export class DescriptionComplaintController {
       return data;
     }
     if (typeof limit != 'number') throw new HttpErrors[400](";/");
+
     const data = await repository.aggregate([
       {
         $match: {
@@ -220,20 +237,20 @@ export class DescriptionComplaintController {
         $project: {
           _id: 1,
           firstName: 1,
-          lastName: 1,
-          nationalCode: 1
+          familyName: 1,
+          nationalCode: 1,
         }
       },
       {
         $lookup: {
           from: "DescriptionComplaint",
-          let: {natCode: "$nationalCode"},
+          let: {nCode: "$nationalCode"},
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    {$eq: ['$nationalCodeUser', '$$natCode']},
+                    {$eq: ['$nationalCodeUser', '$$nCode']},
                   ]
                 }
               }
