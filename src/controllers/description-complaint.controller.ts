@@ -76,6 +76,8 @@ export class DescriptionComplaintController {
     @param.path.number("skip") skip: number,
     @param.path.number("limit") limit: number,
   ): Promise<DescriptionComplaint[]> {
+    console.log("pppppppp");
+
     const data = await this.descriptionComplaintRepository.find({
       skip,
       limit,
@@ -121,7 +123,7 @@ export class DescriptionComplaintController {
 
 
   // ----------------------------------------------
-  @get('/description-complaints/{skip}/{limiting}/{start}/{end}')
+  @get('/description-complaints-time/{skip}/{limiting}/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
@@ -161,7 +163,7 @@ export class DescriptionComplaintController {
     return data;
   }
 
-  @get('/description-complaints/{skip}/{limiting}/{ncode}')
+  @get('/description-complaints-ncode/{skip}/{limiting}/{ncode}')
   @response(200, {
     content: {
       'application/json': {
@@ -177,6 +179,7 @@ export class DescriptionComplaintController {
     @param.path.number('skip') skip: number,
     @param.path.number('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
+
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
     if (limit == "all") {
       const data = await repository.aggregate([
@@ -265,6 +268,7 @@ export class DescriptionComplaintController {
         }
       }
     ]).get()
+
 
     return data;
   }

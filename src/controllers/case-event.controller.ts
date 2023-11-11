@@ -158,7 +158,7 @@ export class CaseEventController {
 
 
   // ---------------------------------------
-  @get('/case-events/{skip}/{limiting}/{start}/{end}')
+  @get('/case-events-time/{skip}/{limiting}/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
