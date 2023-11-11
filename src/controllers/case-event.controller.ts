@@ -158,7 +158,7 @@ export class CaseEventController {
 
 
   // ---------------------------------------
-  @get('/case-events/{start}/{end}')
+  @get('/case-events/{skip}/{limiting}/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
@@ -169,15 +169,28 @@ export class CaseEventController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
+    @param.path.number('skip') skip: number,
+    @param.path.number('limiting') limit: string | number,
   ): Promise<CaseEvent[]> {
+    if (limit == "all") {
+      const data = await this.caseEventRepository.find({
+        where: {
+          dateDo: {
+            between: [start, end]
+          }
+        },
+      });
+      return data;
+    }
+    if (typeof limit != 'number') throw new HttpErrors[400](";/");
     const data = await this.caseEventRepository.find({
+      skip,
+      limit,
       where: {
         dateDo: {
           between: [start, end]
         }
       },
-      // fields: {
-      // }
     });
     return data;
   }

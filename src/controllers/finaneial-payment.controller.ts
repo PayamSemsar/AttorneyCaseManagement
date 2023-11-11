@@ -243,7 +243,7 @@ export class FinaneialPaymentController {
     return data;
   }
 
-  @get('/finaneial-payments/{dcCode}')
+  @get('/finaneial-payments/{skip}/{limiting}/{dcCode}')
   @response(200, {
     content: {
       'application/json': {
@@ -254,18 +254,102 @@ export class FinaneialPaymentController {
       },
     },
   })
-  async findByDcCode(
+  async findByDcCodeWithSkipAndLimitAll(
     @param.path.string('dcCode') dcCode: string,
+    @param.path.number('skip') skip: number,
+    @param.path.number('limiting') limit: string | number,
   ): Promise<FinaneialPayment[]> {
-    const data = await this.finaneialPaymentRepository.find({
-      where: {
-        codeDescriptionComplaint: dcCode
+    const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
+    if (limit == "all") {
+      const data = await repository.aggregate([
+        {
+          $match: {
+            codeDescriptionComplaint: dcCode,
+          }
+        },
+        {
+          $project: {
+            codeDescriptionComplaint: 1,
+            titleDescriptionComplaint: 1,
+            complaintResult: 1,
+            nationalCodeUser: 1
+          }
+        },
+        {
+          $lookup: {
+            from: "FinaneialPayment",
+            let: {dcCode: "$codeDescriptionComplaint"},
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {$eq: ['$nationalCodeUser', '$$dcCode']},
+                    ]
+                  }
+                }
+              },
+              {
+                $project: {
+                  _id: 0,
+                }
+              }
+            ],
+            as: "finaneialPayments"
+          }
+        }
+      ]).get()
+      return data;
+    }
+    if (typeof limit != 'number') throw new HttpErrors[400](";/");
+    const data = await repository.aggregate([
+      {
+        $match: {
+          codeDescriptionComplaint: dcCode,
+        }
+      },
+      {
+        skip
+      },
+      {
+        limit
+      },
+      {
+        $project: {
+          codeDescriptionComplaint: 1,
+          titleDescriptionComplaint: 1,
+          complaintResult: 1,
+          nationalCodeUser: 1
+        }
+      },
+      {
+        $lookup: {
+          from: "FinaneialPayment",
+          let: {dcCode: "$codeDescriptionComplaint"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$nationalCodeUser', '$$dcCode']},
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+              }
+            }
+          ],
+          as: "finaneialPayments"
+        }
       }
-    })
+    ]).get()
     return data;
   }
 
-  @get('/finaneial-payments/{start}/{end}')
+  @get('/finaneial-payments/{skip}/{limiting}/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
@@ -276,15 +360,28 @@ export class FinaneialPaymentController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
+    @param.path.number('skip') skip: number,
+    @param.path.number('limiting') limit: string | number,
   ): Promise<FinaneialPayment[]> {
+    if (limit == "all") {
+      const data = await this.finaneialPaymentRepository.find({
+        where: {
+          date: {
+            between: [start, end]
+          }
+        },
+      });
+      return data;
+    }
+    if (typeof limit != 'number') throw new HttpErrors[400](";/");
     const data = await this.finaneialPaymentRepository.find({
+      skip,
+      limit,
       where: {
         date: {
           between: [start, end]
         }
       },
-      // fields: {
-      // }
     });
     return data;
   }

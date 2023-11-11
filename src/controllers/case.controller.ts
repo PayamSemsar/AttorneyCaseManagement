@@ -157,8 +157,8 @@ export class CaseController {
   })
   async findByCodeCase(
     @param.path.string("cCode") cCode: string,
-  ): Promise<Case[]> {
-    const data = await this.caseRepository.find({
+  ): Promise<Case> {
+    const data = await this.caseRepository.findOne({
       where: {
         codeCase: cCode
       },
@@ -166,6 +166,7 @@ export class CaseController {
         caseID: false
       }
     });
+    if (!data) throw new HttpErrors[400]("همچین کد پرونده ای وجود ندارد");
     return data;
   }
 }
