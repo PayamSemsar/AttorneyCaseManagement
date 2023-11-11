@@ -130,4 +130,31 @@ export class CaseController {
     });
     return data;
   }
+
+  @get('/case/{cCode}')
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Case, {
+            exclude: ['caseID']
+          }),
+        },
+      },
+    },
+  })
+  async findByCodeCase(
+    @param.path.string("cCode") cCode: string,
+  ): Promise<Case[]> {
+    const data = await this.caseRepository.find({
+      where: {
+        codeCase: cCode
+      },
+      fields: {
+        caseID: false
+      }
+    });
+    return data;
+  }
 }
