@@ -42,15 +42,6 @@ export class CaseController {
     })
     createCase: Case,
   ): Promise<void> {
-    const findNationalCodeUser = await this.userRepository.findOne({
-      where: {
-        nationalCode: createCase.userNationalCode
-      },
-      fields: {
-        nationalCode: true
-      }
-    });
-    if (!findNationalCodeUser) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
 
     const findCodeDescriptionComplaint = await this.descriptionComplaintRepository.findOne({
       where: {
@@ -61,6 +52,26 @@ export class CaseController {
       }
     });
     if (!findCodeDescriptionComplaint) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
+
+    const findCaseAgain = await this.caseRepository.findOne({
+      where: {
+        codeDescriptionComplaint: createCase.codeDescriptionComplaint
+      },
+      fields: {
+        codeDescriptionComplaint: true,
+      }
+    });
+    if (findCaseAgain) throw new HttpErrors[400]("در حال حاضر این شکایت دارای پرونده است");
+
+    const findNationalCodeUser = await this.userRepository.findOne({
+      where: {
+        nationalCode: createCase.userNationalCode
+      },
+      fields: {
+        nationalCode: true
+      }
+    });
+    if (!findNationalCodeUser) throw new HttpErrors[400]("مشکل در اطلاعات وجود دارد");
 
     const findPetitionNumber = await this.caseRepository.findOne({
       where: {

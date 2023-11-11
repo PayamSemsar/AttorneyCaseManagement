@@ -134,7 +134,7 @@ export class FinaneialPaymentController {
 
 
   // ----------------------------------------
-  @get('/finaneial-payments/{ncode}')
+  @get('/finaneial-payments/{skip}/{limiting}/{ncode}')
   @response(200, {
     content: {
       'application/json': {
@@ -147,15 +147,65 @@ export class FinaneialPaymentController {
       },
     },
   })
-  async find(
+  async findByNCodeWithSkipAndLimitAll(
     @param.path.string('ncode') ncode: string,
+    @param.path.number('skip') skip: number,
+    @param.path.number('limiting') limit: string | number,
   ): Promise<FinaneialPayment[]> {
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
+    if (limit == "all") {
+      const data = await repository.aggregate([
+        {
+          $match: {
+            nationalCode: ncode,
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            firstName: 1,
+            lastName: 1,
+            nationalCode: 1
+          }
+        },
+        {
+          $lookup: {
+            from: "FinaneialPayment",
+            let: {natCode: "$nationalCode"},
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {$eq: ['$nationalCodeUser', '$$natCode']},
+                    ]
+                  }
+                }
+              },
+              {
+                $project: {
+                  _id: 0,
+                }
+              }
+            ],
+            as: "finaneialPayments"
+          }
+        }
+      ]).get()
+      return data;
+    }
+    if (typeof limit != 'number') throw new HttpErrors[400](";/");
     const data = await repository.aggregate([
       {
         $match: {
           nationalCode: ncode,
         }
+      },
+      {
+        skip,
+      },
+      {
+        limit,
       },
       {
         $project: {
