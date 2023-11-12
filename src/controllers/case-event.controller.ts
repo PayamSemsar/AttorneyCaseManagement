@@ -158,7 +158,7 @@ export class CaseEventController {
 
 
   // ---------------------------------------
-  @get('/case-events-time/{skip}/{limiting}/{start}/{end}')
+  @get('/case-events-time/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
@@ -170,26 +170,10 @@ export class CaseEventController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
-    @param.path.number('skip') skip: number,
-    @param.path.string('limiting') limit: string | number,
+    // @param.path.number('skip') skip: number,
+    // @param.path.string('limiting') limit: string | number,
   ): Promise<CaseEvent[]> {
-    if (limit == "all") {
-      const data = await this.caseEventRepository.find({
-        where: {
-          dateDo: {
-            between: [start, end]
-          }
-        },
-      });
-      return data;
-    }
-
-    limit = Number(limit)
-    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
-
     const data = await this.caseEventRepository.find({
-      skip,
-      limit,
       where: {
         dateDo: {
           between: [start, end]
@@ -197,5 +181,19 @@ export class CaseEventController {
       },
     });
     return data;
+
+    // limit = Number(limit)
+    // if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
+
+    // const data = await this.caseEventRepository.find({
+    //   skip,
+    //   limit,
+    //   where: {
+    //     dateDo: {
+    //       between: [start, end]
+    //     }
+    //   },
+    // });
+    // return data;
   }
 }

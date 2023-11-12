@@ -134,7 +134,7 @@ export class FinaneialPaymentController {
 
 
   // ----------------------------------------
-  @get('/finaneial-payments-ncode/{skip}/{limiting}/{ncode}')
+  @get('/finaneial-payments-ncode/{ncode}')
   @response(200, {
     content: {
       'application/json': {
@@ -148,66 +148,15 @@ export class FinaneialPaymentController {
   })
   async findByNCodeWithSkipAndLimitAll(
     @param.path.string('ncode') ncode: string,
-    @param.path.number('skip') skip: number,
-    @param.path.string('limiting') limit: string | number,
+    // @param.path.number('skip') skip: number,
+    // @param.path.string('limiting') limit: string | number,
   ): Promise<FinaneialPayment> {
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
-    if (limit == "all") {
-      const data = await repository.aggregate([
-        {
-          $match: {
-            nationalCode: ncode,
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            firstName: 1,
-            familyName: 1,
-            nationalCode: 1
-          }
-        },
-        {
-          $lookup: {
-            from: "FinaneialPayment",
-            let: {natCode: "$nationalCode"},
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      {$eq: ['$nationalCodeUser', '$$natCode']},
-                    ]
-                  }
-                }
-              },
-              {
-                $project: {
-                  _id: 0,
-                }
-              }
-            ],
-            as: "finaneialPayments"
-          }
-        }
-      ]).get()
-      return data[0];
-    }
-
-    limit = Number(limit)
-    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
-
     const data = await repository.aggregate([
       {
         $match: {
           nationalCode: ncode,
         }
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
       },
       {
         $project: {
@@ -239,13 +188,62 @@ export class FinaneialPaymentController {
           ],
           as: "finaneialPayments"
         }
-      },
+      }
     ]).get()
-
     return data[0];
+
+    // limit = Number(limit)
+    // if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
+
+    // const data = await repository.aggregate([
+    //   {
+    //     $match: {
+    //       nationalCode: ncode,
+    //     }
+    //   },
+    //   {
+    //     $skip: skip,
+    //   },
+    //   {
+    //     $limit: limit,
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 1,
+    //       firstName: 1,
+    //       familyName: 1,
+    //       nationalCode: 1
+    //     }
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "FinaneialPayment",
+    //       let: {natCode: "$nationalCode"},
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $and: [
+    //                 {$eq: ['$nationalCodeUser', '$$natCode']},
+    //               ]
+    //             }
+    //           }
+    //         },
+    //         {
+    //           $project: {
+    //             _id: 0,
+    //           }
+    //         }
+    //       ],
+    //       as: "finaneialPayments"
+    //     }
+    //   },
+    // ]).get()
+
+    // return data[0];
   }
 
-  @get('/finaneial-payments-dccode/{skip}/{limiting}/{dcCode}')
+  @get('/finaneial-payments-dccode/{dcCode}')
   @response(200, {
     content: {
       'application/json': {
@@ -257,66 +255,15 @@ export class FinaneialPaymentController {
   })
   async findByDcCodeWithSkipAndLimitAll(
     @param.path.string('dcCode') dcCode: string,
-    @param.path.number('skip') skip: number,
-    @param.path.string('limiting') limit: string | number,
+    // @param.path.number('skip') skip: number,
+    // @param.path.string('limiting') limit: string | number,
   ): Promise<FinaneialPayment> {
     const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
-    if (limit == "all") {
-      const data = await repository.aggregate([
-        {
-          $match: {
-            codeDescriptionComplaint: dcCode,
-          }
-        },
-        {
-          $project: {
-            codeDescriptionComplaint: 1,
-            titleDescriptionComplaint: 1,
-            complaintResult: 1,
-            nationalCodeUser: 1
-          }
-        },
-        {
-          $lookup: {
-            from: "FinaneialPayment",
-            let: {dcCode: "$codeDescriptionComplaint"},
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      {$eq: ['$nationalCodeUser', '$$dcCode']},
-                    ]
-                  }
-                }
-              },
-              {
-                $project: {
-                  _id: 0,
-                }
-              }
-            ],
-            as: "finaneialPayments"
-          }
-        }
-      ]).get()
-      return data[0];
-    }
-
-    limit = Number(limit)
-    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
-
     const data = await repository.aggregate([
       {
         $match: {
           codeDescriptionComplaint: dcCode,
         }
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
       },
       {
         $project: {
@@ -351,9 +298,58 @@ export class FinaneialPaymentController {
       }
     ]).get()
     return data[0];
+
+    //   limit = Number(limit)
+    //   if(isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
+
+    // const data = await repository.aggregate([
+    //   {
+    //     $match: {
+    //       codeDescriptionComplaint: dcCode,
+    //     }
+    //   },
+    //   {
+    //     $skip: skip,
+    //   },
+    //   {
+    //     $limit: limit,
+    //   },
+    //   {
+    //     $project: {
+    //       codeDescriptionComplaint: 1,
+    //       titleDescriptionComplaint: 1,
+    //       complaintResult: 1,
+    //       nationalCodeUser: 1
+    //     }
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "FinaneialPayment",
+    //       let: {dcCode: "$codeDescriptionComplaint"},
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $and: [
+    //                 {$eq: ['$nationalCodeUser', '$$dcCode']},
+    //               ]
+    //             }
+    //           }
+    //         },
+    //         {
+    //           $project: {
+    //             _id: 0,
+    //           }
+    //         }
+    //       ],
+    //       as: "finaneialPayments"
+    //     }
+    //   }
+    // ]).get()
+    // return data[0];
   }
 
-  @get('/finaneial-payments-time/{skip}/{limiting}/{start}/{end}')
+  @get('/finaneial-payments-time/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
@@ -365,26 +361,10 @@ export class FinaneialPaymentController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
-    @param.path.number('skip') skip: number,
-    @param.path.string('limiting') limit: string | number,
+    // @param.path.number('skip') skip: number,
+    // @param.path.string('limiting') limit: string | number,
   ): Promise<FinaneialPayment[]> {
-    if (limit == "all") {
-      const data = await this.finaneialPaymentRepository.find({
-        where: {
-          date: {
-            between: [start, end]
-          }
-        },
-      });
-      return data;
-    }
-
-    limit = Number(limit)
-    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
-
     const data = await this.finaneialPaymentRepository.find({
-      skip,
-      limit,
       where: {
         date: {
           between: [start, end]
@@ -392,5 +372,19 @@ export class FinaneialPaymentController {
       },
     });
     return data;
+
+    // limit = Number(limit)
+    // if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
+
+    // const data = await this.finaneialPaymentRepository.find({
+    //   skip,
+    //   limit,
+    //   where: {
+    //     date: {
+    //       between: [start, end]
+    //     }
+    //   },
+    // });
+    // return data;
   }
 }

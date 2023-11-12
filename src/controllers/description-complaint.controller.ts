@@ -178,7 +178,7 @@ export class DescriptionComplaintController {
     return data[0];
   }
 
-  @get('/description-complaints-time/{skip}/{limiting}/{start}/{end}')
+  @get('/description-complaints-time/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
@@ -190,58 +190,10 @@ export class DescriptionComplaintController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
-    @param.path.number('skip') skip: number,
-    @param.path.string('limiting') limit: string | number,
+    // @param.path.number('skip') skip: number,
+    // @param.path.string('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
     const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
-
-    if (limit == "all") {
-      const data = await repository.aggregate([
-        {
-          $match: {
-            datePresence: {
-              $gte: start,
-              $lte: end
-            },
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-          }
-        },
-        {
-          $lookup: {
-            from: "User",
-            let: {nCode: "$nationalCodeUser"},
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      {$eq: ['$nationalCode', '$$nCode']},
-                    ]
-                  },
-                }
-              },
-              {
-                $project: {
-                  _id: 1,
-                  firstName: 1,
-                  familyName: 1,
-                  nationalCode: 1,
-                }
-              }
-            ],
-            as: "users"
-          }
-        }
-      ]).get()
-      return data;
-    }
-
-    limit = Number(limit)
-    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
 
     const data = await repository.aggregate([
       {
@@ -256,12 +208,6 @@ export class DescriptionComplaintController {
         $project: {
           _id: 0,
         }
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
       },
       {
         $lookup: {
@@ -291,9 +237,61 @@ export class DescriptionComplaintController {
       }
     ]).get()
     return data;
+
+    // limit = Number(limit)
+    // if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
+
+    // const data = await repository.aggregate([
+    //   {
+    //     $match: {
+    //       datePresence: {
+    //         $gte: start,
+    //         $lte: end
+    //       },
+    //     }
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //     }
+    //   },
+    //   {
+    //     $skip: skip,
+    //   },
+    //   {
+    //     $limit: limit,
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "User",
+    //       let: {nCode: "$nationalCodeUser"},
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $and: [
+    //                 {$eq: ['$nationalCode', '$$nCode']},
+    //               ]
+    //             },
+    //           }
+    //         },
+    //         {
+    //           $project: {
+    //             _id: 1,
+    //             firstName: 1,
+    //             familyName: 1,
+    //             nationalCode: 1,
+    //           }
+    //         }
+    //       ],
+    //       as: "users"
+    //     }
+    //   }
+    // ]).get()
+    // return data;
   }
 
-  @get('/description-complaints-ncode/{skip}/{limiting}/{ncode}')
+  @get('/description-complaints-ncode/{ncode}')
   @response(200, {
     content: {
       'application/json': {
@@ -305,67 +303,16 @@ export class DescriptionComplaintController {
   })
   async findByNCodeWithSkipAndLimitAll(
     @param.path.string('ncode') ncode: string,
-    @param.path.number('skip') skip: number,
-    @param.path.string('limiting') limit: string | number,
+    // @param.path.number('skip') skip: number,
+    // @param.path.string('limiting') limit: string | number,
   ): Promise<DescriptionComplaint> {
 
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
-    if (limit == "all") {
-      const data = await repository.aggregate([
-        {
-          $match: {
-            nationalCode: ncode,
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            firstName: 1,
-            familyName: 1,
-            nationalCode: 1,
-          }
-        },
-        {
-          $lookup: {
-            from: "DescriptionComplaint",
-            let: {nCode: "$nationalCode"},
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      {$eq: ['$nationalCodeUser', '$$nCode']},
-                    ]
-                  }
-                }
-              },
-              {
-                $project: {
-                  _id: 0,
-                }
-              }
-            ],
-            as: "descriptionComplaints"
-          }
-        }
-      ]).get()
-      return data[0];
-    }
-
-    limit = Number(limit)
-    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
-
     const data = await repository.aggregate([
       {
         $match: {
           nationalCode: ncode,
         }
-      },
-      {
-        $skip: skip,
-      },
-      {
-        $limit: limit,
       },
       {
         $project: {
@@ -399,8 +346,57 @@ export class DescriptionComplaintController {
         }
       }
     ]).get()
-
-
     return data[0];
+
+    // limit = Number(limit)
+    // if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
+
+    // const data = await repository.aggregate([
+    //   {
+    //     $match: {
+    //       nationalCode: ncode,
+    //     }
+    //   },
+    //   {
+    //     $skip: skip,
+    //   },
+    //   {
+    //     $limit: limit,
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 1,
+    //       firstName: 1,
+    //       familyName: 1,
+    //       nationalCode: 1,
+    //     }
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "DescriptionComplaint",
+    //       let: {nCode: "$nationalCode"},
+    //       pipeline: [
+    //         {
+    //           $match: {
+    //             $expr: {
+    //               $and: [
+    //                 {$eq: ['$nationalCodeUser', '$$nCode']},
+    //               ]
+    //             }
+    //           }
+    //         },
+    //         {
+    //           $project: {
+    //             _id: 0,
+    //           }
+    //         }
+    //       ],
+    //       as: "descriptionComplaints"
+    //     }
+    //   }
+    // ]).get()
+
+
+    // return data[0];
   }
 }
