@@ -4,8 +4,10 @@ import {
   repository
 } from '@loopback/repository';
 import {
+  HttpErrors,
   get,
-  getModelSchemaRef, HttpErrors, param,
+  getModelSchemaRef,
+  param,
   post,
   requestBody,
   response
@@ -135,7 +137,7 @@ export class DescriptionComplaintController {
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
     @param.path.number('skip') skip: number,
-    @param.path.number('limiting') limit: string | number,
+    @param.path.string('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
     if (limit == "all") {
       const data = await this.descriptionComplaintRepository.find({
@@ -148,8 +150,8 @@ export class DescriptionComplaintController {
       return data;
     }
 
-
-    if (typeof limit != 'number') throw new HttpErrors[400](";/");
+    limit = Number(limit)
+    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
 
     const data = await this.descriptionComplaintRepository.find({
       skip,
@@ -177,7 +179,7 @@ export class DescriptionComplaintController {
   async findByNCodeWithSkipAndLimitAll(
     @param.path.string('ncode') ncode: string,
     @param.path.number('skip') skip: number,
-    @param.path.number('limiting') limit: string | number,
+    @param.path.string('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
 
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
@@ -222,7 +224,9 @@ export class DescriptionComplaintController {
       ]).get()
       return data;
     }
-    if (typeof limit != 'number') throw new HttpErrors[400](";/");
+
+    limit = Number(limit)
+    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
 
     const data = await repository.aggregate([
       {

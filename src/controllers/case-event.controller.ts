@@ -170,7 +170,7 @@ export class CaseEventController {
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
     @param.path.number('skip') skip: number,
-    @param.path.number('limiting') limit: string | number,
+    @param.path.string('limiting') limit: string | number,
   ): Promise<CaseEvent[]> {
     if (limit == "all") {
       const data = await this.caseEventRepository.find({
@@ -182,7 +182,10 @@ export class CaseEventController {
       });
       return data;
     }
-    if (typeof limit != 'number') throw new HttpErrors[400](";/");
+
+    limit = Number(limit)
+    if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
+
     const data = await this.caseEventRepository.find({
       skip,
       limit,
