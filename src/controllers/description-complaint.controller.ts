@@ -121,6 +121,8 @@ export class DescriptionComplaintController {
     return data;
   }
 
+  // ----------------------------------------------
+
   @get('/description-complaint-code/{dcCode}')
   @response(200, {
     content: {
@@ -176,12 +178,11 @@ export class DescriptionComplaintController {
     return data[0];
   }
 
-
-  // ----------------------------------------------
   @get('/description-complaints-time/{skip}/{limiting}/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
+        type: "array",
         schema: getModelSchemaRef(DescriptionComplaint),
       },
     },

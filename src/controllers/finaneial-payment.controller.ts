@@ -250,7 +250,6 @@ export class FinaneialPaymentController {
     content: {
       'application/json': {
         schema: {
-          type: 'array',
           items: getModelSchemaRef(FinaneialPayment),
         },
       },
@@ -260,7 +259,7 @@ export class FinaneialPaymentController {
     @param.path.string('dcCode') dcCode: string,
     @param.path.number('skip') skip: number,
     @param.path.string('limiting') limit: string | number,
-  ): Promise<FinaneialPayment[]> {
+  ): Promise<FinaneialPayment> {
     const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
     if (limit == "all") {
       const data = await repository.aggregate([
@@ -301,7 +300,7 @@ export class FinaneialPaymentController {
           }
         }
       ]).get()
-      return data;
+      return data[0];
     }
 
     limit = Number(limit)
@@ -351,13 +350,14 @@ export class FinaneialPaymentController {
         }
       }
     ]).get()
-    return data;
+    return data[0];
   }
 
   @get('/finaneial-payments-time/{skip}/{limiting}/{start}/{end}')
   @response(200, {
     content: {
       'application/json': {
+        type: 'array',
         schema: getModelSchemaRef(FinaneialPayment),
       },
     },
@@ -367,7 +367,7 @@ export class FinaneialPaymentController {
     @param.path.number('end') end: number,
     @param.path.number('skip') skip: number,
     @param.path.string('limiting') limit: string | number,
-  ): Promise<FinaneialPayment> {
+  ): Promise<FinaneialPayment[]> {
     if (limit == "all") {
       const data = await this.finaneialPaymentRepository.find({
         where: {
@@ -376,7 +376,7 @@ export class FinaneialPaymentController {
           }
         },
       });
-      return data[0];
+      return data;
     }
 
     limit = Number(limit)
@@ -391,6 +391,6 @@ export class FinaneialPaymentController {
         }
       },
     });
-    return data[0];
+    return data;
   }
 }

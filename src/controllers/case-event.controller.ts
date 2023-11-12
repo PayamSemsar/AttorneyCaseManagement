@@ -162,6 +162,7 @@ export class CaseEventController {
   @response(200, {
     content: {
       'application/json': {
+        type: "array",
         schema: getModelSchemaRef(CaseEvent),
       },
     },
