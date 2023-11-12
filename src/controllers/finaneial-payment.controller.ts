@@ -139,7 +139,6 @@ export class FinaneialPaymentController {
     content: {
       'application/json': {
         schema: {
-          type: 'array',
           items: getModelSchemaRef(FinaneialPayment, {
             exclude: ['finaneialPaymentID']
           }),
@@ -151,7 +150,7 @@ export class FinaneialPaymentController {
     @param.path.string('ncode') ncode: string,
     @param.path.number('skip') skip: number,
     @param.path.string('limiting') limit: string | number,
-  ): Promise<FinaneialPayment[]> {
+  ): Promise<FinaneialPayment> {
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
     if (limit == "all") {
       const data = await repository.aggregate([
@@ -192,7 +191,7 @@ export class FinaneialPaymentController {
           }
         }
       ]).get()
-      return data;
+      return data[0];
     }
 
     limit = Number(limit)
@@ -240,10 +239,10 @@ export class FinaneialPaymentController {
           ],
           as: "finaneialPayments"
         }
-      }
+      },
     ]).get()
 
-    return data;
+    return data[0];
   }
 
   @get('/finaneial-payments-dccode/{skip}/{limiting}/{dcCode}')
@@ -368,7 +367,7 @@ export class FinaneialPaymentController {
     @param.path.number('end') end: number,
     @param.path.number('skip') skip: number,
     @param.path.string('limiting') limit: string | number,
-  ): Promise<FinaneialPayment[]> {
+  ): Promise<FinaneialPayment> {
     if (limit == "all") {
       const data = await this.finaneialPaymentRepository.find({
         where: {
@@ -377,7 +376,7 @@ export class FinaneialPaymentController {
           }
         },
       });
-      return data;
+      return data[0];
     }
 
     limit = Number(limit)
@@ -392,6 +391,6 @@ export class FinaneialPaymentController {
         }
       },
     });
-    return data;
+    return data[0];
   }
 }
