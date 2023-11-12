@@ -192,77 +192,70 @@ export class DescriptionComplaintController {
     @param.path.number('skip') skip: number,
     @param.path.string('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
-    const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
+    const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
 
     if (limit == "all") {
       const data = await repository.aggregate([
-        // {
-        //   $match: {
-        //     datePresence: {
-        //       $gte: start,
-        //       $lte: end
-        //     },
-        //   }
-        // },
+        {
+          $match: {
+            datePresence: {
+              $gte: start,
+              $lte: end
+            },
+          }
+        },
         {
           $project: {
-            _id: 1,
-            firstName: 1,
-            familyName: 1,
-            nationalCode: 1,
+            _id: 0,
           }
         },
         {
           $lookup: {
-            from: "DescriptionComplaint",
-            let: {nCode: "$nationalCode"},
+            from: "User",
+            let: {nCode: "$nationalCodeUser"},
             pipeline: [
               {
                 $match: {
                   $expr: {
                     $and: [
-                      {$eq: ['$nationalCodeUser', '$$nCode']},
+                      {$eq: ['$nationalCode', '$$nCode']},
                     ]
-                  },
-                  datePresence: {
-                    $gte: start,
-                    $lte: end
                   },
                 }
               },
               {
                 $project: {
-                  _id: 0,
+                  _id: 1,
+                  firstName: 1,
+                  familyName: 1,
+                  nationalCode: 1,
                 }
               }
             ],
-            as: "descriptionComplaints"
+            as: "users"
           }
         }
       ]).get()
       return data;
-      // const data = await this.descriptionComplaintRepository.find({
-      //   where: {
-      //     datePresence: {
-      //       between: [start, end]
-      //     }
-      //   },
-      // });
-      // return data;
     }
 
     limit = Number(limit)
     if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
 
     const data = await repository.aggregate([
-      // {
-      //   $match: {
-      //     datePresence: {
-      //       $gte: start,
-      //       $lte: end
-      //     },
-      //   }
-      // },
+      {
+        $match: {
+          datePresence: {
+            $gte: start,
+            $lte: end
+          },
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+        }
+      },
       {
         $skip: skip,
       },
@@ -270,50 +263,32 @@ export class DescriptionComplaintController {
         $limit: limit,
       },
       {
-        $project: {
-          _id: 1,
-          firstName: 1,
-          familyName: 1,
-          nationalCode: 1,
-        }
-      },
-      {
         $lookup: {
-          from: "DescriptionComplaint",
-          let: {nCode: "$nationalCode"},
+          from: "User",
+          let: {nCode: "$nationalCodeUser"},
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    {$eq: ['$nationalCodeUser', '$$nCode']},
+                    {$eq: ['$nationalCode', '$$nCode']},
                   ]
-                },
-                datePresence: {
-                  $gte: start,
-                  $lte: end
                 },
               }
             },
             {
               $project: {
-                _id: 0,
+                _id: 1,
+                firstName: 1,
+                familyName: 1,
+                nationalCode: 1,
               }
             }
           ],
-          as: "descriptionComplaints"
+          as: "users"
         }
       }
     ]).get()
-    // const data = await this.descriptionComplaintRepository.find({
-    //   skip,
-    //   limit,
-    //   where: {
-    //     datePresence: {
-    //       between: [start, end]
-    //     }
-    //   },
-    // });
     return data;
   }
 
