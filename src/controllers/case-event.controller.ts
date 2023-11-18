@@ -20,7 +20,7 @@ import fs from "fs";
 import {RoleKeys} from '../enums';
 import {FILE_UPLOAD_SERVICE} from '../keys';
 import {CaseEvent} from '../models';
-import {CaseEventRepository, CaseRepository} from '../repositories';
+import {CaseEventRepository, CaseRepository, DescriptionComplaintRepository} from '../repositories';
 import {basicAuthorization} from '../services';
 import {FileUploadHandler} from '../types';
 @authenticate('token')
@@ -30,6 +30,7 @@ export class CaseEventController {
     @inject(FILE_UPLOAD_SERVICE) private handler: FileUploadHandler,
     @repository(CaseEventRepository) public caseEventRepository: CaseEventRepository,
     @repository(CaseRepository) public caseRepository: CaseRepository,
+    @repository(DescriptionComplaintRepository) public descriptionComplaintRepository: DescriptionComplaintRepository,
   ) { }
 
   async creating(request: Request) {
@@ -102,7 +103,62 @@ export class CaseEventController {
       dataReq.fields.fileImage.push(dataReq.files[i].filename)
     }
 
-    await this.caseEventRepository.create(dataReq.fields);
+    console.log("complaintResultUpdate", dataReq.fields.complaintResultUpdate);
+    if (!dataReq.fields.complaintResultUpdate) throw new HttpErrors[400]("aaa");
+    const updateComplaintResult = dataReq.fields.complaintResultUpdate;
+    delete dataReq.fields.complaintResultUpdate;
+    console.log("field", dataReq.fields);
+    console.log("upComRes", updateComplaintResult);
+
+
+    const createIsDone = await this.caseEventRepository.create(dataReq.fields);
+    if (!createIsDone) throw new HttpErrors[400]("در ساخت وقایع پرونده به مشکل خوردیم")
+
+    const caseEventRepositoryAggregate = await ((this.caseEventRepository.dataSource.connector) as any).collection('CaseEvent');
+    const data = await caseEventRepositoryAggregate.aggregate([
+      {
+        $match: {
+          codeCase: createIsDone.codeCase,
+        }
+      },
+      {
+        $project: {
+          codeCase: 1,
+        }
+      },
+      {
+        $lookup: {
+          from: "Case",
+          let: {cCode: "$codeCase"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$codeCase', '$$cCode']},
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                codeCase: 1,
+                codeDescriptionComplaint: 1,
+              }
+            }
+          ],
+          as: "Cases"
+        }
+      }
+    ]).get()
+    console.log(data[0]);
+
+    await this.descriptionComplaintRepository.updateAll({
+      codeDescriptionComplaint: data[0].Cases.codeDescriptionComplaint
+    },
+      {
+        complaintResult: updateComplaintResult
+      })
   }
 
 
