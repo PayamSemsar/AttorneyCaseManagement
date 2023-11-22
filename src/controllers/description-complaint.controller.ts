@@ -399,4 +399,58 @@ export class DescriptionComplaintController {
 
     // return data[0];
   }
+
+
+  @authenticate('token')
+  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
+  @get("/description-complaints-code/{code}")
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(DescriptionComplaint, {
+          exclude: ['complaintResult', 'datePresence', 'descriptionComplaint', 'descriptionComplaintID', 'nationalCodeUser', 'titleDescriptionComplaint']
+        })
+      },
+    },
+  })
+  async getDescriptionComplaintByCode(
+    @param.path.string("code") code: string,
+  ): Promise<DescriptionComplaint[]> {
+    const data = await this.descriptionComplaintRepository.find({
+      where: {
+        codeDescriptionComplaint: {regexp: code},
+      },
+      fields: {
+        codeDescriptionComplaint: true
+      }
+    });
+    return data;
+  }
+
+
+  @authenticate('token')
+  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
+  @get("/description-complaints-title/{title}")
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(DescriptionComplaint, {
+          exclude: ['complaintResult', 'datePresence', 'descriptionComplaint', 'descriptionComplaintID', 'nationalCodeUser', 'codeDescriptionComplaint']
+        })
+      },
+    },
+  })
+  async getDescriptionComplaintByTitle(
+    @param.path.string("title") title: string,
+  ): Promise<DescriptionComplaint[]> {
+    const data = await this.descriptionComplaintRepository.find({
+      where: {
+        titleDescriptionComplaint: {regexp: title},
+      },
+      fields: {
+        titleDescriptionComplaint: true
+      }
+    });
+    return data;
+  }
 }

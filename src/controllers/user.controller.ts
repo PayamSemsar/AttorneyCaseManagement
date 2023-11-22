@@ -88,14 +88,45 @@ export class UserController {
   })
   async getUserByID(
     @param.path.string("id") userId: string,
-  ): Promise<User | null> {
+  ): Promise<User> {
     const data = await this.userRepository.findOne({
       where: {userID: userId},
       fields: {firstName: true, familyName: true, nationalCode: true, userID: true}
     });
+    if (!data) {
+      throw new HttpErrors[400]("همچین کاربری وجود ندارد")
+    }
     return data;
   }
 
+
+
+
+  @authenticate('token')
+  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
+  @get("/users-code/{code}")
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(User, {
+          exclude: ['familyName', 'firstName', 'userID', 'addressOne', 'addressTwo', 'codePost', 'phoneNumber', 'role']
+        })
+      },
+    },
+  })
+  async getUserByCode(
+    @param.path.string("code") code: string,
+  ): Promise<User[]> {
+    const data = await this.userRepository.find({
+      where: {
+        nationalCode: {regexp: code},
+      },
+      fields: {
+        nationalCode: true
+      }
+    });
+    return data;
+  }
 
 
   // auth ---------------------------------------------->

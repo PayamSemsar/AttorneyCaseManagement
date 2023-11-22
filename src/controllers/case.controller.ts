@@ -169,4 +169,33 @@ export class CaseController {
     if (!data) throw new HttpErrors[400]("همچین کد پرونده ای وجود ندارد");
     return data;
   }
+
+
+
+
+  @authenticate('token')
+  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
+  @get("/cases-code/{code}")
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Case, {
+          exclude: ['accuseds', 'branchArchiveNumber', 'caseID', 'caseNumber', 'codeDescriptionComplaint', 'dateSet', 'petitionNumber', 'userNationalCode']
+        })
+      },
+    },
+  })
+  async getUserByCode(
+    @param.path.string("code") code: string,
+  ): Promise<Case[]> {
+    const data = await this.caseRepository.find({
+      where: {
+        codeCase: {regexp: code},
+      },
+      fields: {
+        codeCase: true
+      }
+    });
+    return data;
+  }
 }
