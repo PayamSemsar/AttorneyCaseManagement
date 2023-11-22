@@ -103,13 +103,9 @@ export class CaseEventController {
       dataReq.fields.fileImage.push(dataReq.files[i].filename)
     }
 
-    console.log("complaintResultUpdate", dataReq.fields.complaintResultUpdate);
     if (!dataReq.fields.complaintResultUpdate) throw new HttpErrors[400]("aaa");
     const updateComplaintResult = dataReq.fields.complaintResultUpdate;
     delete dataReq.fields.complaintResultUpdate;
-    console.log("field", dataReq.fields);
-    console.log("upComRes", updateComplaintResult);
-
 
     const createIsDone = await this.caseEventRepository.create(dataReq.fields);
     if (!createIsDone) throw new HttpErrors[400]("در ساخت وقایع پرونده به مشکل خوردیم")
@@ -151,13 +147,12 @@ export class CaseEventController {
         }
       }
     ]).get()
-    console.log(data[0]);
 
     await this.descriptionComplaintRepository.updateAll({
-      codeDescriptionComplaint: data[0].Cases.codeDescriptionComplaint
+      complaintResult: updateComplaintResult
     },
       {
-        complaintResult: updateComplaintResult
+        codeDescriptionComplaint: data[0].Cases.codeDescriptionComplaint
       })
   }
 
