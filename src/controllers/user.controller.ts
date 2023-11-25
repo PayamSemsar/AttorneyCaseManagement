@@ -69,7 +69,19 @@ export class UserController {
     @param.path.number("skip") skip: number,
     @param.path.number("limit") limit: number,
   ): Promise<User[]> {
-    const data = await this.userRepository.find({skip, limit, fields: {firstName: true, familyName: true, nationalCode: true, userID: true}, where: {role: RoleKeys.User}});
+    const data = await this.userRepository.find({
+      skip,
+      limit,
+      fields: {
+        firstName: true,
+        familyName: true,
+        nationalCode: true,
+        userID: true
+      },
+      where: {
+        role: RoleKeys.User
+      }
+    });
     return data;
   }
 
@@ -119,6 +131,7 @@ export class UserController {
   ): Promise<User[]> {
     const data = await this.userRepository.find({
       where: {
+        role: RoleKeys.User,
         nationalCode: {regexp: code},
       },
       fields: {
@@ -146,6 +159,7 @@ export class UserController {
   ): Promise<User[]> {
     const data = await this.userRepository.find({
       where: {
+        role: RoleKeys.User,
         firstName: {regexp: firstName},
         familyName: {regexp: familyName},
       },
