@@ -128,6 +128,35 @@ export class UserController {
     return data;
   }
 
+  @authenticate('token')
+  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
+  @get("/users-names/{name}/{family}")
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(User, {
+          exclude: ['nationalCode', 'userID', 'addressOne', 'addressTwo', 'codePost', 'phoneNumber', 'role']
+        })
+      },
+    },
+  })
+  async getUserByNameAndFamily(
+    @param.path.string("name") firstName: string,
+    @param.path.string("family") familyName: string,
+  ): Promise<User[]> {
+    const data = await this.userRepository.find({
+      where: {
+        firstName: {regexp: firstName},
+        familyName: {regexp: familyName},
+      },
+      fields: {
+        firstName: true,
+        familyName: true
+      }
+    });
+    return data;
+  }
+
 
   // auth ---------------------------------------------->
   @post('/auth/login')

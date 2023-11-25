@@ -222,12 +222,24 @@ export class CaseEventController {
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
   ): Promise<CaseEvent[]> {
+    let where: any = {};
+
+    if (start && end) {
+      where.dateDo = {
+        between: [start, end],
+      };
+    } else if (start) {
+      where.dateDo = {
+        gte: start,
+      };
+    } else if (end) {
+      where.dateDo = {
+        lte: end,
+      };
+    }
+
     const data = await this.caseEventRepository.find({
-      where: {
-        dateDo: {
-          between: [start, end]
-        }
-      },
+      where,
     });
     return data;
 

@@ -190,17 +190,31 @@ export class DescriptionComplaintController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
-    // @param.path.number('skip') skip: number,
-    // @param.path.string('limiting') limit: string | number,
   ): Promise<DescriptionComplaint[]> {
     const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
+
+    let where: any = {};
+
+    if (start && end) {
+      where = {
+        $gte: start,
+        $lte: end
+      };
+    } else if (start) {
+      where = {
+        $gte: start,
+      };
+    } else if (end) {
+      where = {
+        $lte: end,
+      };
+    }
 
     const data = await repository.aggregate([
       {
         $match: {
           datePresence: {
-            $gte: start,
-            $lte: end
+            where
           },
         }
       },

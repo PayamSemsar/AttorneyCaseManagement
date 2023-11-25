@@ -148,8 +148,6 @@ export class FinaneialPaymentController {
   })
   async findByNCodeWithSkipAndLimitAll(
     @param.path.string('ncode') ncode: string,
-    // @param.path.number('skip') skip: number,
-    // @param.path.string('limiting') limit: string | number,
   ): Promise<FinaneialPayment> {
     const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
     const data = await repository.aggregate([
@@ -192,55 +190,7 @@ export class FinaneialPaymentController {
     ]).get()
     return data[0];
 
-    // limit = Number(limit)
-    // if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
 
-    // const data = await repository.aggregate([
-    //   {
-    //     $match: {
-    //       nationalCode: ncode,
-    //     }
-    //   },
-    //   {
-    //     $skip: skip,
-    //   },
-    //   {
-    //     $limit: limit,
-    //   },
-    //   {
-    //     $project: {
-    //       _id: 1,
-    //       firstName: 1,
-    //       familyName: 1,
-    //       nationalCode: 1
-    //     }
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "FinaneialPayment",
-    //       let: {natCode: "$nationalCode"},
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 {$eq: ['$nationalCodeUser', '$$natCode']},
-    //               ]
-    //             }
-    //           }
-    //         },
-    //         {
-    //           $project: {
-    //             _id: 0,
-    //           }
-    //         }
-    //       ],
-    //       as: "finaneialPayments"
-    //     }
-    //   },
-    // ]).get()
-
-    // return data[0];
   }
 
   @get('/finaneial-payments-dccode/{dcCode}')
@@ -361,30 +311,25 @@ export class FinaneialPaymentController {
   async findByTime(
     @param.path.number('start') start: number,
     @param.path.number('end') end: number,
-    // @param.path.number('skip') skip: number,
-    // @param.path.string('limiting') limit: string | number,
   ): Promise<FinaneialPayment[]> {
+    let where: any = {};
+
+    if (start && end) {
+      where.date = {
+        between: [start, end],
+      };
+    } else if (start) {
+      where.date = {
+        gte: start,
+      };
+    } else if (end) {
+      where.date = {
+        lte: end,
+      };
+    }
     const data = await this.finaneialPaymentRepository.find({
-      where: {
-        date: {
-          between: [start, end]
-        }
-      },
+      where,
     });
     return data;
-
-    // limit = Number(limit)
-    // if (isNaN(limit)) throw new HttpErrors[400]("مفداریر در پارامتر صحیح نمی باشد");
-
-    // const data = await this.finaneialPaymentRepository.find({
-    //   skip,
-    //   limit,
-    //   where: {
-    //     date: {
-    //       between: [start, end]
-    //     }
-    //   },
-    // });
-    // return data;
   }
 }
