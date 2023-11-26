@@ -193,7 +193,7 @@ export class DescriptionComplaintController {
   ): Promise<DescriptionComplaint[]> {
     const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
 
-    let where: any = {};
+    let where;
 
     if (start && end) {
       where = {
