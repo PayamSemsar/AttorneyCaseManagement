@@ -213,9 +213,7 @@ export class DescriptionComplaintController {
     const data = await repository.aggregate([
       {
         $match: {
-          datePresence: {
-            where
-          },
+          datePresence: where,
         }
       },
       {
