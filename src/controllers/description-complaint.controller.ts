@@ -457,14 +457,45 @@ export class DescriptionComplaintController {
   async getDescriptionComplaintByTitle(
     @param.path.string("title") title: string,
   ): Promise<DescriptionComplaint[]> {
-    const data = await this.descriptionComplaintRepository.find({
-      where: {
-        titleDescriptionComplaint: {regexp: title},
+    const repository = await ((this.descriptionComplaintRepository.dataSource.connector) as any).collection('DescriptionComplaint')
+
+    const data = await repository.aggregate([
+      {
+        $match: {
+          titleDescriptionComplaint: {$regex: title},
+        }
       },
-      fields: {
-        descriptionComplaintID: false,
+      {
+        $project: {
+          _id: 0,
+        }
+      },
+      {
+        $lookup: {
+          from: "User",
+          let: {nCode: "$nationalCodeUser"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$nationalCode', '$$nCode']},
+                  ]
+                },
+              }
+            },
+            {
+              $project: {
+                firstName: 1,
+                familyName: 1,
+              }
+            }
+          ],
+          as: "User"
+        }
       }
-    });
+    ]).get()
+
     return data;
   }
 
