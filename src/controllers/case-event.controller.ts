@@ -152,7 +152,7 @@ export class CaseEventController {
       complaintResult: updateComplaintResult
     },
       {
-        codeDescriptionComplaint: data[0].Cases.codeDescriptionComplaint
+        codeDescriptionComplaint: data[0].Cases[0].codeDescriptionComplaint
       })
   }
 
