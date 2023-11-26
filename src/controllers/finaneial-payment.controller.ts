@@ -230,7 +230,7 @@ export class FinaneialPaymentController {
               $match: {
                 $expr: {
                   $and: [
-                    {$eq: ['$nationalCodeUser', '$$dcCode']},
+                    {$eq: ['$codeDescriptionComplaint', '$$dcCode']},
                   ]
                 }
               }
