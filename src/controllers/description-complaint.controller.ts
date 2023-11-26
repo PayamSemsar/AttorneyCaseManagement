@@ -14,7 +14,7 @@ import {
 } from '@loopback/rest';
 import {RoleKeys} from '../enums';
 import {codeGenerator} from '../helpers';
-import {DescriptionComplaint} from '../models';
+import {DescriptionComplaint, User} from '../models';
 import {CaseRepository, DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services';
 var ObjectId = require('mongodb').ObjectId;
@@ -462,9 +462,79 @@ export class DescriptionComplaintController {
         titleDescriptionComplaint: {regexp: title},
       },
       fields: {
-        titleDescriptionComplaint: true
+        descriptionComplaintID: false,
       }
     });
+    return data;
+  }
+
+  @authenticate('token')
+  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
+  @get("/description-complaints-names/{name}/{family}")
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(User)
+      },
+    },
+  })
+  async getDescriptionComplaintByNames(
+    @param.path.string("name") name: string,
+    @param.path.string("family") family: string,
+  ): Promise<User[]> {
+    let where;
+
+    if (name && family) {
+      where = {
+        firstName: name,
+        familyName: family,
+      }
+    } else if (name) {
+      where = {
+        firstName: name,
+      }
+    } else if (family) {
+      where = {
+        familyName: family,
+      }
+    }
+    const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
+    const data = await repository.aggregate([
+      {
+        $match: where
+      },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          familyName: 1,
+          nationalCode: 1,
+        }
+      },
+      {
+        $lookup: {
+          from: "DescriptionComplaint",
+          let: {nCode: "$nationalCode"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$nationalCodeUser', '$$nCode']},
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+              }
+            }
+          ],
+          as: "descriptionComplaints"
+        }
+      }
+    ]).get()
     return data;
   }
 }

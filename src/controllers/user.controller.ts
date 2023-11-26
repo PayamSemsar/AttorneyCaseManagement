@@ -157,12 +157,28 @@ export class UserController {
     @param.path.string("name") firstName: string,
     @param.path.string("family") familyName: string,
   ): Promise<User[]> {
-    const data = await this.userRepository.find({
-      where: {
+
+    let where;
+
+    if (firstName && familyName) {
+      where = {
         role: RoleKeys.User,
         firstName: {regexp: firstName},
         familyName: {regexp: familyName},
-      },
+      }
+    } else if (firstName) {
+      where = {
+        role: RoleKeys.User,
+        firstName: {regexp: firstName},
+      }
+    } else if (familyName) {
+      where = {
+        role: RoleKeys.User,
+        familyName: {regexp: familyName},
+      }
+    }
+    const data = await this.userRepository.find({
+      where: where,
       fields: {
         firstName: true,
         familyName: true

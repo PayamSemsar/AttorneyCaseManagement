@@ -19,7 +19,7 @@ import {
 import fs from "fs";
 import {RoleKeys} from '../enums';
 import {FILE_UPLOAD_SERVICE} from '../keys';
-import {FinaneialPayment} from '../models';
+import {FinaneialPayment, User} from '../models';
 import {DescriptionComplaintRepository, FinaneialPaymentRepository, UserRepository} from '../repositories';
 import {basicAuthorization} from '../services';
 import {FileUploadHandler} from '../types';
@@ -189,8 +189,6 @@ export class FinaneialPaymentController {
       }
     ]).get()
     return data[0];
-
-
   }
 
   @get('/finaneial-payments-dccode/{dcCode}')
@@ -330,6 +328,78 @@ export class FinaneialPaymentController {
     const data = await this.finaneialPaymentRepository.find({
       where,
     });
+    return data;
+  }
+
+
+
+  @get('/finaneial-payments-names/{name}/{family}')
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: {
+          items: getModelSchemaRef(User),
+        },
+      },
+    },
+  })
+  async findBy(
+    @param.path.string('name') name: string,
+    @param.path.string('family') family: string,
+  ): Promise<User[]> {
+    let where;
+
+    if (name && family) {
+      where = {
+        firstName: name,
+        familyName: family,
+      }
+    } else if (name) {
+      where = {
+        firstName: name,
+      }
+    } else if (family) {
+      where = {
+        familyName: family,
+      }
+    }
+    const repository = await ((this.userRepository.dataSource.connector) as any).collection('User')
+    const data = await repository.aggregate([
+      {
+        $match: where
+      },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          familyName: 1,
+          nationalCode: 1
+        }
+      },
+      {
+        $lookup: {
+          from: "FinaneialPayment",
+          let: {natCode: "$nationalCode"},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$nationalCodeUser', '$$natCode']},
+                  ]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+              }
+            }
+          ],
+          as: "finaneialPayments"
+        }
+      }
+    ]).get()
     return data;
   }
 }
