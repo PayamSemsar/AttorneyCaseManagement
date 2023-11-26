@@ -171,8 +171,6 @@ export class CaseController {
   }
 
 
-
-
   @authenticate('token')
   @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
   @get("/cases-code/{code}")
@@ -197,5 +195,60 @@ export class CaseController {
       }
     });
     return data;
+  }
+
+
+
+  @authenticate('token')
+  @authorize({allowedRoles: [RoleKeys.Admin], voters: [basicAuthorization]})
+  @get("/case-code-and-event/{cCode}")
+  @response(200, {
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Case)
+      },
+    },
+  })
+  async getUserByCodeReturnCaseevent(
+    @param.path.string("cCode") cCode: string,
+  ): Promise<Case[]> {
+    const repository = await ((this.caseRepository.dataSource.connector) as any).collection('Case')
+
+    const data = await repository.aggregate([
+      {
+        $match: {
+          codeCase: cCode
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+        }
+      },
+      {
+        $lookup: {
+          from: "CaseEvent",
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$codeCase', cCode]},
+                  ]
+                },
+              }
+            },
+            {
+              $project: {
+                _id: 0
+              }
+            }
+          ],
+          as: "CaseEvents"
+        }
+      }
+    ]).get()
+
+    return data[0];
   }
 }
