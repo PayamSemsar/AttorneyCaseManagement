@@ -177,15 +177,18 @@ export class CaseController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(Case, {
-          exclude: ['accuseds', 'branchArchiveNumber', 'caseID', 'caseNumber', 'codeDescriptionComplaint', 'dateSet', 'petitionNumber', 'userNationalCode']
-        })
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
       },
     },
   })
   async getUserByCode(
     @param.path.string("code") code: string,
-  ): Promise<Case[]> {
+  ): Promise<string[]> {
     const data = await this.caseRepository.find({
       where: {
         codeCase: {regexp: code},
@@ -194,7 +197,9 @@ export class CaseController {
         codeCase: true
       }
     });
-    return data;
+    const codeCases = data.map((item) => item.codeCase);
+
+    return codeCases;
   }
 
 

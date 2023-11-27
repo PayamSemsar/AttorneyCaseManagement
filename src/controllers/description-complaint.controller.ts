@@ -419,15 +419,18 @@ export class DescriptionComplaintController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(DescriptionComplaint, {
-          exclude: ['complaintResult', 'datePresence', 'descriptionComplaint', 'descriptionComplaintID', 'nationalCodeUser', 'titleDescriptionComplaint']
-        })
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
       },
     },
   })
   async getDescriptionComplaintByCode(
     @param.path.string("code") code: string,
-  ): Promise<DescriptionComplaint[]> {
+  ): Promise<string[]> {
     const data = await this.descriptionComplaintRepository.find({
       where: {
         codeDescriptionComplaint: {regexp: code},
@@ -436,7 +439,9 @@ export class DescriptionComplaintController {
         codeDescriptionComplaint: true
       }
     });
-    return data;
+    const codeDescriptionComplaints = data.map((item) => item.codeDescriptionComplaint);
+
+    return codeDescriptionComplaints;
   }
 
 
