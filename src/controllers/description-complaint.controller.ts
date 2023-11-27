@@ -510,7 +510,7 @@ export class DescriptionComplaintController {
   async getDescriptionComplaintByNames(
     @param.path.string("name") name: string,
     @param.path.string("family") family: string,
-  ): Promise<User[]> {
+  ): Promise<User> {
     let where;
 
     if (name && family) {
@@ -564,6 +564,7 @@ export class DescriptionComplaintController {
         }
       }
     ]).get()
-    return data;
+
+    return data[0];
   }
 }

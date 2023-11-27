@@ -346,7 +346,7 @@ export class FinaneialPaymentController {
   async findBy(
     @param.path.string('name') name: string,
     @param.path.string('family') family: string,
-  ): Promise<User[]> {
+  ): Promise<User> {
     let where;
 
     if (name && family) {
@@ -400,6 +400,7 @@ export class FinaneialPaymentController {
         }
       }
     ]).get()
-    return data;
+
+    return data[0];
   }
 }
