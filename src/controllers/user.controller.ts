@@ -120,25 +120,29 @@ export class UserController {
   @response(200, {
     content: {
       'application/json': {
-        schema: getModelSchemaRef(User, {
-          exclude: ['familyName', 'firstName', 'userID', 'addressOne', 'addressTwo', 'codePost', 'phoneNumber', 'role']
-        })
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
       },
     },
   })
   async getUserByCode(
     @param.path.string("code") code: string,
-  ): Promise<User[]> {
+  ): Promise<string[]> {
     const data = await this.userRepository.find({
       where: {
         role: RoleKeys.User,
         nationalCode: {regexp: code},
       },
       fields: {
-        nationalCode: true
-      }
+        nationalCode: true,
+      },
     });
-    return data;
+    const nationalCodes = data.map((item) => item.nationalCode);
+    return nationalCodes;
   }
 
   @authenticate('token')
