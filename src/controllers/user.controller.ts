@@ -158,8 +158,8 @@ export class UserController {
     },
   })
   async getUserByNameAndFamily(
-    @param.path.string("name") firstName: string,
-    @param.path.string("family") familyName: string,
+    @param.path.string("name") firstName: string | null,
+    @param.path.string("family") familyName: string | null,
   ): Promise<User[]> {
 
     let where;

@@ -344,8 +344,8 @@ export class FinaneialPaymentController {
     },
   })
   async findBy(
-    @param.path.string('name') name: string,
-    @param.path.string('family') family: string,
+    @param.path.string('name') name: string | null,
+    @param.path.string('family') family: string | null,
   ): Promise<User> {
     let where;
 
